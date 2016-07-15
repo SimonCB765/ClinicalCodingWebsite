@@ -5,6 +5,7 @@ For more detailed information see the [links](#Links) at the bottom of the page.
 # EC2 Instance Spin Up
 
 1. Launch an EC2 instance (assumed to be Ubuntu here).
+    * The security group should be created so that only specific known and secure IPs can access the server through port 22.
     * Save the key generated during this process somewhere you won't forget.
     * Make the key R/W only by you (e.g. chmod 700)
 2. From the EC2 management console, locate the public DNS for your instance (something like ec2-\*\*-\*\*\*-\*\*\*-\*\*.eu-west-1.compute.amazonaws.com).

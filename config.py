@@ -12,7 +12,7 @@ class Config(object):
     CSRF_ENABLED = True  # Enable protection against Cross-site Request Forgery (CSRF).
     DEBUG = False  # Disable debug mode.
     TESTING = False  # Disable testing mode.
-    CSRF_SESSION_KEY = SECRET_KEY = "secret"  # Setup the csrf and regular Flask secret keys.
+    WTF_CSRF_SECRET_KEY = SECRET_KEY = "Some Random Secret String"  # Setup the csrf and regular Flask secret keys.
     DATABASE_URI = ""
 
 

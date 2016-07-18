@@ -1,4 +1,4 @@
-"""Handlers for the pages made available by this module."""
+"""Handlers for the pages made available by this blueprint."""
 
 # Flask imports.
 from flask import render_template

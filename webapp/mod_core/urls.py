@@ -1,4 +1,4 @@
-"""URL endpoints for the pages made available by this module."""
+"""URL endpoints for the pages made available by this blueprint."""
 
 # User imports.
 from . import modCore, views

@@ -1,0 +1,77 @@
+form {
+    border : 1px solid #CCC;
+    border-radius: 1em;
+    margin: 0 auto;
+    padding: 1em;
+    width : 50%;
+}
+
+header {
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+}
+
+h1 {
+    margin: 1em;
+    margin-top: 0;
+    text-align: center;
+}
+
+hr {
+    margin: 1em 0;
+}
+
+textarea {
+    font-size: 1.1em;
+    height: 10em;
+    margin: 0;
+    padding: 0;
+    resize: vertical;
+    width: 100%;
+}
+
+fieldset {
+    border-style: solid;
+    margin: 0.5em 0;
+}
+
+legend {
+    font-weight: bold;
+}
+
+ul {
+    list-style: none;
+    margin : 0.5em 1em;
+    padding: 0;
+}
+
+fieldset.errorsPresent {
+    border-color: red;
+}
+
+p.errorsPresent {
+    background-color: red;
+    border-radius: 0.3em;
+    color: white;
+    font-size: 1.1em;
+    margin: 0;
+    margin-bottom: 1em;
+    padding: 0;
+    text-align: center;
+}
+
+.errorMessage {
+    color: red;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 0;
+    margin-bottom: 0.5em;
+    padding: 0;
+}
+
+#buttons input[type=submit] {
+    display: block;
+    margin: 0 auto;
+    margin-top: 1em;
+}

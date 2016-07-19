@@ -1,5 +1,8 @@
 """Function to validate a file of concept definitions."""
 
+# Python imports.
+import json
+
 
 def main(uploadContents, fileFormat, isFileUploaded):
     """Function to validate a file of concept definitions.
@@ -20,8 +23,19 @@ def main(uploadContents, fileFormat, isFileUploaded):
     isValidContents = True
     errorMessage = ""
     if fileFormat == "json":
-        # Validate the input in JSON format.
-        pass
+        # Validate the input in JSON format. This consists of just making sure that the contents can be parsed as valid
+        # JSON and has at least one attribute.
+        try:
+            jsonContent = json.loads(uploadContents.read())
+            if not jsonContent:
+                # There are no concepts defined in the JSON file.
+                isValidContents = False
+                errorMessage = "The file of concepts must contain terms for at least one concept."
+        except ValueError as err:
+            # The JSON is not correctly formatted.
+            isValidContents = False
+            errorMessage = "Error in {0:s} JSON content - {1:s}."\
+                .format("uploaded file" if isFileUploaded else "text area", str(err))
     else:
         # Validate non-JSON input with the assumption that it is therefore in the flat file format.
         # The only requirements on a flat file is that the first non-whitespace character of the file is a # and

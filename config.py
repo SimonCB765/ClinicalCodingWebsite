@@ -17,11 +17,12 @@ class Config(object):
 
 
 class ProductionConfig(Config):
-    pass
+    DATABASE_URI = "bolt://ec2-52-209-72-113.eu-west-1.compute.amazonaws.com:7687"
 
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    DATABASE_URI = "bolt://localhost:7687/"
 
 
 class TestingConfig(Config):

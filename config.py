@@ -9,6 +9,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config(object):
+    ALLOWED_EXTENSIONS = ["csv", "json", "tsv", "txt"]
     CSRF_ENABLED = True  # Enable protection against Cross-site Request Forgery (CSRF).
     DATABASE_PASSWORD = "root"
     DATABASE_URI = ""

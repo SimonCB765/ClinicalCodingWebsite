@@ -10,10 +10,12 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
     CSRF_ENABLED = True  # Enable protection against Cross-site Request Forgery (CSRF).
+    DATABASE_PASSWORD = "root"
+    DATABASE_URI = ""
+    DATABASE_USERNAME = "neo4j"
     DEBUG = False  # Disable debug mode.
     TESTING = False  # Disable testing mode.
     WTF_CSRF_SECRET_KEY = SECRET_KEY = "Some Random Secret String"  # Setup the csrf and regular Flask secret keys.
-    DATABASE_URI = ""
 
 
 class ProductionConfig(Config):

@@ -62,7 +62,9 @@ def concept_definitions_validator(form, field):
             form.conceptSubmit.errors.extend(errors)
 
         uploadContents.seek(0)  # Reset the stream back to the start so that it can be properly validated.
-        uploadContents.detach()  # Detach the buffer to prevent TextIOWrapper closing the underlying file.
+        if isFileUploaded:
+            # Only need to detach when it was a file uploaded.
+            uploadContents.detach()  # Detach the buffer to prevent TextIOWrapper closing the underlying file.
 
 
 class MultiCheckboxField(SelectMultipleField):

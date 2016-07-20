@@ -39,7 +39,6 @@ def concept_definitions_validator(form, field):
             uploadContents = io.TextIOWrapper(form.conceptFile.data, newline=None)
         else:
             # Text was entered in the text area.
-            filename = "ConceptDefinitions"
             fileFormat = form.textAreaType.data
             uploadContents = io.StringIO(form.conceptText.data, newline=None)
 
@@ -61,6 +60,9 @@ def concept_definitions_validator(form, field):
             else:
                 form.conceptSubmit.errors.append("Errors found while validating the uploaded file.")
             form.conceptSubmit.errors.extend(errors)
+
+        uploadContents.seek(0)  # Reset the stream back to the start so that it can be properly validated.
+        uploadContents.detach()  # Detach the buffer to prevent TextIOWrapper closing the underlying file.
 
 
 class MultiCheckboxField(SelectMultipleField):

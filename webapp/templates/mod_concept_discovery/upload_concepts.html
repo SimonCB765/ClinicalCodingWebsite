@@ -22,14 +22,9 @@
             <fieldset class={{ "errorsPresent" if form.conceptSubmit.errors else "" }}>
                 <legend>Concept Upload Options</legend>
                 {% if form.conceptSubmit.errors %}
-                    <p class="errorMessage">
-                        {% for error in form.conceptSubmit.errors %}
-                            {{ error }}
-                            {% if not loop.last %}
-                                <br/>
-                            {% endif %}
-                        {% endfor %}
-                    </p>
+                    {% for error in form.conceptSubmit.errors %}
+                        <p class="errorMessage">{{ error }}</p>
+                    {% endfor %}
                 {% endif %}
                 <em>Enter concept definitions in the text box or upload a file of definitions.</em>
                 <p>
@@ -46,14 +41,9 @@
             <fieldset class={{ "errorsPresent" if formatErrors else "" }}>
                 <legend>Code Format Options</legend>
                 {% if formatErrors %}
-                    <p class="errorMessage">
-                        {% for error in formatErrors %}
-                            {{ error }}
-                            {% if not loop.last %}
-                                <br/>
-                            {% endif %}
-                        {% endfor %}
-                    </p>
+                    {% for error in formatErrors %}
+                        <p class="errorMessage">{{ error }}</p>
+                    {% endfor %}
                 {% endif %}
                 <em>Select code formats to find.</em>
                 <ul>

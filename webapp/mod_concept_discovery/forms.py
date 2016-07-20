@@ -1,24 +1,78 @@
 """Classes for forms used by this blueprint."""
 
+# Python imports.
+import io
+import json
+
 # Flask imports.
+from flask import current_app
 from flask_wtf import Form
 
 # 3rd party imports.
 from wtforms import FileField, SelectMultipleField, SubmitField, TextAreaField, widgets
 from wtforms.validators import DataRequired, ValidationError
 
+# User imports.
+from .ConceptCollection import ConceptCollection
+
 
 def concept_definitions_validator(form, field):
-    """Validate that either the text box or the file upload has content, but not both."""
+    """Validate the concept definitions."""
 
-    isFileUploaded = form.conceptFile.data
-    isTextEntered = form.conceptText.data
+    isFileUploaded = bool(form.conceptFile.data)
+    isTextEntered = bool(form.conceptText.data)
     if isFileUploaded and isTextEntered:
         # Concepts were uploaded as a file and text.
         raise ValidationError("Only one source of concepts can be provided.")
     elif not isFileUploaded and not isTextEntered:
         # No concepts were uploaded.
         raise ValidationError("No source of concepts was provided.")
+    else:
+        # Concepts were provided, so validate them.
+
+        # Determine the content that was uploaded, and record some information about it.
+        # Wrap the text area's content in StringIO in order to enable file-like operations on it, and to keep it in
+        # line with how the uploaded file content is accessed.
+        if isFileUploaded:
+            # A file was uploaded.
+            filename = form.conceptFile.data.filename
+            fileFormat = (filename.rsplit('.', 1)[1]).lower()
+            uploadContents = io.TextIOWrapper(form.conceptFile.data, newline=None)
+        else:
+            # Text was entered in the text area.
+            filename = "ConceptDefinitions"
+            uploadContents = io.StringIO(form.conceptText.data, newline=None)
+
+            # Determine format. The pasted text is assumed to be json if it can be parsed correctly as JSON.
+            try:
+                json.loads(uploadContents.read())
+                fileFormat = "json"
+            except ValueError:
+                fileFormat = "txt"
+            uploadContents.seek(0)  # Reset the stream back to the start so that it can be properly validated.
+
+        # Ensure that the format of the uploaded file is correct.
+        allowedExtensions = current_app.config["ALLOWED_EXTENSIONS"]
+        if fileFormat not in allowedExtensions:
+            # The format of the file is not one of the accepted ones.
+            raise ValidationError("Uploaded {0:s} file is not in one of the accepted formats - {1:s} or {2:s}."
+                                  .format(fileFormat, ", ".join(allowedExtensions[:-1]), allowedExtensions[-1]))
+
+        # Validate the uploaded concept(s). The only real constraint on the the concept file is that at least one
+        # concept is defined in the correct format.
+        isValidContents, errorMessages = ConceptCollection.validate_concept_file(
+            uploadContents, fileFormat, isFileUploaded)
+
+        if not isValidContents:
+            # Found an error in the uploaded file or text area.
+            if not isFileUploaded:
+                errorMessage = "Pasted text was treated as {0:s} as it {1:s} possible to parse it as JSON.".format(
+                    fileFormat.upper() if fileFormat == "json" else "a flat file",
+                    "was" if fileFormat == "json" else "wasn't")
+                form.conceptSubmit.errors.append(errorMessage)
+            else:
+                form.conceptSubmit.errors.append("Errors found while validating uploaded file.")
+            form.conceptSubmit.errors.extend(errorMessages)
 
 
 class MultiCheckboxField(SelectMultipleField):

@@ -5,6 +5,7 @@ from abc import ABCMeta
 from collections import defaultdict
 import json
 import logging
+import re
 
 # Globals.
 LOGGER = logging.getLogger(__name__)
@@ -29,6 +30,35 @@ class ConceptCollection(metaclass=ABCMeta):
     }
 
     """
+
+    def __new__(cls, fileConceptDefinitions, conceptSource="FlatFile"):
+        """Create a set of concept definitions.
+
+        :param fileConceptDefinitions:  The location of the file containing the concept definitions.
+        :type fileConceptDefinitions:   str
+        :param conceptSource:           The type of concept definition source file. Valid values are (case insensitive):
+                                            flatfile    - for the flat file input format
+                                            json        - for the JSON input format
+        :type conceptSource:            str
+        :return:                        A ConceptCollection subclass determined by the conceptSource parameter.
+        :rtype:                         ConceptCollection subclass
+
+        """
+
+        if cls is ConceptCollection:
+            # An attempt is being made to create a ConceptDefinition, so determine which subclass to generate.
+            if conceptSource.lower() == "flatfile":
+                # Generate a _FlatFileDefinitions.
+                return super(ConceptCollection, cls).__new__(_FlatFileDefinitions)
+            elif conceptSource.lower() == "json":
+                # Generate a _JSONDefinitions.
+                return super(ConceptCollection, cls).__new__(_JSONDefinitions)
+            else:
+                # Didn't get one of the permissible
+                raise ValueError("{0:s} is not a permissible value for conceptSource".format(str(conceptSource)))
+        else:
+            # An attempt is being made to create a ConceptDefinition subclass, so create the subclass.
+            return super(ConceptCollection, cls).__new__(cls, fileConceptDefinitions)
 
     def __init__(self, fileConceptDefinitions):
         """Initialise the concepts and their definitions."""
@@ -123,3 +153,104 @@ class ConceptCollection(metaclass=ABCMeta):
                 errors.append("The first line with content must contain non-whitespace characters after the #.")
 
         return isValidContents, errors
+
+
+class _FlatFileDefinitions(ConceptCollection):
+    """Create a set of concept definitions from a flat file input source."""
+
+    def __init__(self, fileConceptDefinitions):
+        """Initialise the set of concept definitions from a flat file input source.
+
+        Terms and codes for a concept can be specified as negative or positive terms. If there is no header for a set
+        of terms/codes (i.e. it is not specified whether they are negative or positive), then they are assumed to
+        be positive.
+
+        :param fileConceptDefinitions:  The location of the file containing the concept definitions.
+        :type fileConceptDefinitions:   str
+
+        """
+
+        # Initialise the super class.
+        super(_FlatFileDefinitions).__init__(fileConceptDefinitions)
+
+        # Compile the cde cleaning regular expression.
+        codeCleaner = re.compile("([^a-zA-Z0-9%]|%(?!$))")
+
+        # Extract concept definitions.
+        currentConcept = None  # The current concept having its terms/codes extracted.
+        currentSection = "Positive"  # Whether the current terms/codes being extracted are positive or negative terms.
+        with open(fileConceptDefinitions, 'r') as fidConceptDefinitions:
+            for line in fidConceptDefinitions:
+                line = line.strip()
+                if line[:2] == "##":
+                    # Found a header for the terms/codes, so update whether the following ones are positive or negative.
+                    if line[2:].strip().lower() == "positive":
+                        currentSection = "Positive"
+                    elif line[2:].strip().lower() == "negative":
+                        currentSection = "Negative"
+                    else:
+                        LOGGER.warning("The term/code type definition \"{0:s}\" for concept {1:s} is specified "
+                                       "incorrectly. The terms and codes will still be treated as {2:s}."
+                                       .format(line.strip(), currentConcept, currentSection))
+                elif line[0] == '#':
+                    # Found the start of a new concept.
+                    currentConcept = re.sub("\s+", '_', line[1:].strip())  # Record the new concept (no whitespace).
+                    if currentConcept not in self._concepts:
+                        # If the current concept is not in the list of concepts, then add it.
+                        self._concepts.append(currentConcept)
+                    currentSection = "Positive"  # Reset the default term/code type back to positive.
+                elif line == '':
+                    # The line has no content on it.
+                    pass
+                elif line[0] == '>':
+                    # Found a concept defining code.
+                    code = line[1:].strip()
+                    # Clean the code. Remove all non-alphanumeric characters, except for a final % if one is present.
+                    code = codeCleaner.sub('', code)
+                    self._conceptDefinitions[currentConcept][currentSection]["Codes"].append(code)
+                else:
+                    # Found a concept defining term.
+                    rawTerm = line.strip()
+                    rawTerm = re.sub("\s+", ' ', rawTerm)  # Turn consecutive whitespace into a single space.
+                    self._conceptDefinitions[currentConcept][currentSection]["Terms"].append(rawTerm)
+
+
+class _JSONDefinitions(ConceptCollection):
+    """Create a set of concept definitions from a JSON input source."""
+
+    def __init__(self, fileConceptDefinitions):
+        """Initialise the set of concept definitions from a JSON input source.
+
+        :param fileConceptDefinitions:  The location of the file containing the concept definitions.
+        :type fileConceptDefinitions:   str
+
+        """
+
+        # Initialise the super class.
+        super(_JSONDefinitions).__init__(fileConceptDefinitions)
+
+        # Compile the cde cleaning regular expression.
+        codeCleaner = re.compile("([^a-zA-Z0-9%]|%(?!$))")
+
+        # Load the definitions.
+        fidConceptDefinitions = open(fileConceptDefinitions, 'r')
+        jsonContent = json.load(fidConceptDefinitions)
+        fidConceptDefinitions.close()
+
+        # Remove unnecessary fields and convert any term/code values that are dictionaries to lists. The conversion
+        # just keeps the keys from the dictionary, but will result in an arbitrary ordering.
+        for i in jsonContent:
+            # Iterate through concepts.
+            for j in jsonContent[i]:
+                # Iterate through the level where positive and negative fields be.
+                for k in jsonContent[i][j]:
+                    # Iterate through the level where term and code fields should be.
+                    if k in ["Codes", "Terms"]:
+                        self._conceptDefinitions[i][j][k] = list(jsonContent[i][j][k])
+
+        # Clean the codes in the JSON data to remove all non-alphanumeric characters, except for a final % sign if one
+        # is present.
+        for i in self._conceptDefinitions:
+            for j in self._conceptDefinitions[i]:
+                self._conceptDefinitions[i][j]["Codes"] = \
+                    [codeCleaner.sub('', k) for k in self._conceptDefinitions[i][j]["Codes"]]

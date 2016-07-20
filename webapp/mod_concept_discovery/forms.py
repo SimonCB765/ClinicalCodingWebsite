@@ -2,7 +2,6 @@
 
 # Python imports.
 import io
-import json
 
 # Flask imports.
 from flask import current_app

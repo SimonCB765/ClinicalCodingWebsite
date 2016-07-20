@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Concept Discovery</title>
@@ -18,7 +18,7 @@
             </p>
         {% endif %}
 
-        <section>
+        <p>
             <fieldset class={{ "errorsPresent" if form.conceptSubmit.errors else "" }}>
                 <legend>Concept Upload Options</legend>
                 {% if form.conceptSubmit.errors %}
@@ -27,9 +27,19 @@
                     {% endfor %}
                 {% endif %}
                 <em>Enter concept definitions in the text box or upload a file of definitions.</em>
-                <p>
-                    {{ form.conceptText }}
-                </p>
+                {{ form.conceptText }}
+                <em>{{ form.textAreaType.label }}</em>
+                <ul class="textAreaFormat">
+                    {% for option in form.textAreaType %}
+                        <li>
+                            {% if form.errors %}
+                                {{ option }} {{ option.label }}
+                            {% else %}
+                                {{ option(checked=option.data == form.textAreaType.default) }} {{ option.label }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
                 <p>
                     {{ form.conceptFile }}
                 </p>

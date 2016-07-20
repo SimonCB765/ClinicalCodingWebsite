@@ -7,9 +7,6 @@ import json
 import logging
 import re
 
-# Globals.
-LOGGER = logging.getLogger(__name__)
-
 
 class ConceptCollection(metaclass=ABCMeta):
     """Class of concept definitions and associated methods.
@@ -79,14 +76,13 @@ class ConceptCollection(metaclass=ABCMeta):
         :type fileFormat:       str
         :param isFileUploaded:  Whether the concept definitions come from an uploaded file or a text area.
         :type isFileUploaded:   bool
-        :return:                Whether the concept definitions are valid, and the associated error message.
-        :rtype:                 bool, str
+        :return:                The error messages generated during the validation.
+        :rtype:                 list
 
         """
 
         # Validate the uploaded concept(s). The only real constraint on the the concept file is that at least one
         # concept is defined in the correct format.
-        isValidContents = True
         errors = []
         if fileFormat == "json":
             # Validate the input in JSON format.
@@ -94,7 +90,6 @@ class ConceptCollection(metaclass=ABCMeta):
                 jsonContent = json.loads(uploadContents.read())
                 if not jsonContent:
                     # There are no concepts defined in the JSON file.
-                    isValidContents = False
                     errors.append("The file of concepts must contain terms for at least one concept.")
                 else:
                     # There are concepts defined, so make sure their definitions have the correct fields. This
@@ -120,39 +115,44 @@ class ConceptCollection(metaclass=ABCMeta):
                         except AttributeError:
                             # The concept is not associated with a dictionary.
                             errors.append("The value for concept {0:s} is not a dictionary.".format(i))
-                    isValidContents = not errors
             except ValueError as err:
                 # The JSON is not correctly formatted.
-                isValidContents = False
                 errors.append("Error in {0:s} JSON content - {1:s}."
                               .format("uploaded file" if isFileUploaded else "text area", str(err)))
         else:
             # Validate non-JSON input with the assumption that it is therefore in the flat file format.
-            # The only requirements on a flat file is that the first non-whitespace character of the file is a # and
-            # that there is some non-whitespace content on that line following the #.
+            # The only requirements on a flat file is that the first non-whitespace character of the file is a #,
+            # that there is some non-whitespace content on that line following the # and that any time a line starts
+            # with ## it is followed by positive or negative.
             line = uploadContents.readline()
+            lineNumber = 1
             firstCharacterFound = None  # The first character in the file found.
             contentOnFirstLine = False
-            while line and not firstCharacterFound:
+            while line:
                 # Loop until you find a character. We know there is contents in the file/text area due to the form
                 # validation carried out.
                 line = line.strip()
                 if line:
                     # The line has non-whitespace characters on it.
-                    firstCharacterFound = line[0]
-                    contentOnFirstLine = len(line) > 1  # Test for other non-whitespace characters on the line.
+                    if not firstCharacterFound:
+                        firstCharacterFound = line[0]
+                        contentOnFirstLine = len(line) > 1  # Test for other non-whitespace characters on the line.
+                    elif line[:2] == "##":
+                        # Found a description for the terms/codes, so check that it is either positive or negative.
+                        if line[2:].strip().lower() not in ["positive", "negative"]:
+                            errors.append("The description for the terms/codes on line {0:d} is not \"Positive\" or "
+                                          "\"Negative\".".format(lineNumber))
                 line = uploadContents.readline()
+                lineNumber += 1
             if firstCharacterFound != '#':
                 # The first character in the file was not a '#'.
-                isValidContents = False
                 errors.append("The first non-whitespace character of the {0:s} must be a # not a '{1:s}'."
                               .format("uploaded file" if isFileUploaded else "text area", firstCharacterFound))
             elif not contentOnFirstLine:
                 # There was not valid content on the first line, and therefore no first concept.
-                isValidContents = False
                 errors.append("The first line with content must contain non-whitespace characters after the #.")
 
-        return isValidContents, errors
+        return errors
 
 
 class _FlatFileDefinitions(ConceptCollection):
@@ -188,10 +188,6 @@ class _FlatFileDefinitions(ConceptCollection):
                         currentSection = "Positive"
                     elif line[2:].strip().lower() == "negative":
                         currentSection = "Negative"
-                    else:
-                        LOGGER.warning("The term/code type definition \"{0:s}\" for concept {1:s} is specified "
-                                       "incorrectly. The terms and codes will still be treated as {2:s}."
-                                       .format(line.strip(), currentConcept, currentSection))
                 elif line[0] == '#':
                     # Found the start of a new concept.
                     currentConcept = re.sub("\s+", '_', line[1:].strip())  # Record the new concept (no whitespace).

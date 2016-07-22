@@ -84,7 +84,7 @@ class ConceptUploadForm(Form):
     conceptText = TextAreaField()
     textAreaType = RadioField("Concept format:", choices=[("txt", "Flat File"), ("json", "JSON")], default="txt")
     conceptFile = FileField()
-    codeFormats = MultiCheckboxField(choices=[("CTV3", "CTV3"), ("ReadV2", "Read v2"), ("SNOMED_CT", "SNOMED-CT")],
-                                     default="ReadV2",
-                                     validators=[DataRequired(message="At least one code format must be selected.")])
+    codeFormats = RadioField(choices=[("CTV3", "CTV3"), ("ReadV2", "Read v2"), ("SNOMED_CT", "SNOMED-CT")],
+                             default="CTV3",
+                             validators=[DataRequired(message="At least one code format must be selected.")])
     conceptSubmit = SubmitField("Upload Concepts", validators=[concept_definitions_validator])

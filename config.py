@@ -10,6 +10,8 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
     ALLOWED_EXTENSIONS = ["csv", "json", "tsv", "txt"]
+    CELERY_BROKER_URL = "amqp://"
+    CELERY_RESULT_BACKEND = "rpc://"
     CSRF_ENABLED = True  # Enable protection against Cross-site Request Forgery (CSRF).
     DATABASE_PASSWORD = "root"
     DATABASE_URI = ""
@@ -20,7 +22,7 @@ class Config(object):
 
 
 class ProductionConfig(Config):
-    DATABASE_URI = "bolt://ec2-52-209-72-113.eu-west-1.compute.amazonaws.com:7687"
+    DATABASE_URI = "bolt://localhost:7687/"
 
 
 class DevelopmentConfig(Config):

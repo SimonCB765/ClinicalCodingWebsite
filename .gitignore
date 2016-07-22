@@ -1,5 +1,5 @@
 # Ignore all files in the virtual environment except the requirements.
-env
+env/*
 !env/requirements.txt
 
 # Ignore compiled Python files.

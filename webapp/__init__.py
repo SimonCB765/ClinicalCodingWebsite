@@ -2,10 +2,10 @@
 
 # Flask imports.
 from flask import Flask, render_template
+from flask_wtf.csrf import CsrfProtect
 
-# Import modules using their blueprint handler variables.
-from webapp.mod_concept_discovery import modConceptDiscovery
-from webapp.mod_core import modCore
+# 3rd party imports.
+from celery import Celery
 
 
 # Define the WSGI application object.
@@ -13,6 +13,19 @@ app = Flask(__name__)
 
 # Load the configurations.
 app.config.from_object('config.DevelopmentConfig')
+
+# Add CSRF protection.
+CsrfProtect(app)
+
+# Setup the Celery instance. Do this before blueprints are registeres in order to ensure that the import of
+# celeryInstance in the blueprints succeeds.
+celeryInstance = Celery(app.name, backend=app.config["CELERY_RESULT_BACKEND"], broker=app.config["CELERY_BROKER_URL"],
+                        include=["webapp.mod_concept_discovery.long_task"])
+celeryInstance.conf.update(app.config)
+
+# Import modules using their blueprint handler variables.
+from webapp.mod_concept_discovery import modConceptDiscovery
+from webapp.mod_core import modCore
 
 # Register blueprint(s).
 app.register_blueprint(modConceptDiscovery)

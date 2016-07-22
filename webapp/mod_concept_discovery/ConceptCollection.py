@@ -156,30 +156,36 @@ class ConceptCollection(metaclass=ABCMeta):
             line = uploadContents.readline()
             lineNumber = 1
             firstCharacterFound = None  # The first character in the file found.
-            contentOnFirstLine = False
             while line:
                 # Loop until you find a character. We know there is contents in the file/text area due to the form
                 # validation carried out.
                 line = line.strip()
                 if line:
                     # The line has non-whitespace characters on it.
+
                     if not firstCharacterFound:
+                        # Check whether the first non-whitespace character in the input is on this line.
                         firstCharacterFound = line[0]
-                        contentOnFirstLine = len(line) > 1  # Test for other non-whitespace characters on the line.
-                    elif line[:2] == "##":
-                        # Found a description for the terms/codes, so check that it is either positive or negative.
-                        if line[2:].strip().lower() not in ["positive", "negative"]:
-                            errors.append("The description for the terms/codes on line {0:d} is not \"Positive\" or "
-                                          "\"Negative\".".format(lineNumber))
+
+                    if line[0] == '#':
+                        # Found a line with a concept name on it.
+                        if not line[1:].strip():
+                            # There was no content on the concept name line.
+                            errors.append("Line {0:d} begins with a # but has no concept name on it."
+                                          .format(lineNumber))
+                    elif line[0] == '$':
+                        # Found a control term. Check whether it has valid values.
+                        controlTerm = line[1:].strip().split()[0]
+                        if controlTerm.lower() not in ["positive", "negative", "search", "output"]:
+                            errors.append("The control term {0:s} on line {1:d} is not valid."
+                                          .format(controlTerm, lineNumber))
                 line = uploadContents.readline()
                 lineNumber += 1
+
             if firstCharacterFound != '#':
                 # The first character in the file was not a '#'.
                 errors.append("The first non-whitespace character of the {0:s} must be a # not a '{1:s}'."
                               .format("uploaded file" if isFileUploaded else "text area", firstCharacterFound))
-            elif not contentOnFirstLine:
-                # There was not valid content on the first line, and therefore no first concept.
-                errors.append("The first line with content must contain non-whitespace characters after the #.")
 
         return errors
 
@@ -203,7 +209,6 @@ class _FlatFileDefinitions(ConceptCollection):
         super(_FlatFileDefinitions).__init__(fileConceptDefinitions)
 
         # Compile the needed regular expressions.
-        whitespaceRemover = re.compile("\s+")  # Used to replace white space.
         codeCleaner = re.compile("\.+$")  # Used to strip trailing full stops from codes.
 
         # Extract concept definitions.
@@ -224,7 +229,7 @@ class _FlatFileDefinitions(ConceptCollection):
                     currentSection = "Positive"  # Reset the default term/code type back to positive.
                 elif line[0] == "$":
                     # Found a control term. Check whether it indicates positive or negative aspects of a concept.
-                    cleanedLine = whitespaceRemover.sub('', line[1:])
+                    cleanedLine = line[1:].strip()
                     if cleanedLine.lower() == "positive":
                         currentSection = "Positive"
                     elif cleanedLine.lower() == "negative":

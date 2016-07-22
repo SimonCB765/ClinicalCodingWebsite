@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Concepts</title>
+</head>
+<body>
+    <script>
+        // Record the URL for querying the status of the concept discovery job running.
+        var statusURL = "{{ url_for("conceptDiscovery.task_status", taskID=taskID) }}"
+    </script>
+    <script type=text/javascript src="{{ url_for('static', filename='JS/jquery.js') }}"></script>
+    <script type=text/javascript
+            src="{{ url_for('static', filename='JS/mod_concept_discovery/view_concepts.js') }}"></script>
+</body>
+</html>

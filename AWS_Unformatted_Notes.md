@@ -1,3 +1,20 @@
+TODO
+    Production configuration will need changing if we run the Neo4j off the same server
+        bt still note that you can run it off another server using the public DNS
+
+Background database queries
+    RabbitMQ
+        sudo apt-get update
+        sudo apt-get install rabbitmq-server
+        start it in the background
+            sudo rabbitmq-server -detached
+    Celerey
+        sudo pip install celery
+    Windows manual start up
+        env\Scripts\celery.exe worker -A webapp.celeryInstance
+
+
+
 Concept definition notes
     codes included will have all alphanumerc charcters removed, except for a final % if one is present
     the uploaded file format is taken from the extension (.txt, .csv or .tsv for flat file and .json for JSON) (case insensitive)
@@ -7,6 +24,7 @@ Concept definition notes
 
 Notes
     Need to switch between development and production config in webapp init
+    jQuery 3.1.0 in use
 
 
 Security groups

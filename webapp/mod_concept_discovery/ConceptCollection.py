@@ -163,8 +163,8 @@ class ConceptCollection(metaclass=ABCMeta):
                 if line:
                     # The line has non-whitespace characters on it.
 
-                    if not firstCharacterFound:
-                        # Check whether the first non-whitespace character in the input is on this line.
+                    if line[0] != '%' and not firstCharacterFound:
+                        # The first non-whitespace character, that is not in a comment, is on this line.
                         firstCharacterFound = line[0]
 
                     if line[0] == '#':

@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Concept Discovery</title>
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='CSS/mod_concept_discovery/concept_form.css') }}">
+    <link rel=stylesheet
+          type=text/css
+          href="{{ url_for('static', filename='CSS/mod_concept_discovery/concept_form.css') }}">
 </head>
 <body>
     <form action="{{ url_for('conceptDiscovery.upload_concepts') }}" enctype="multipart/form-data" method="POST">

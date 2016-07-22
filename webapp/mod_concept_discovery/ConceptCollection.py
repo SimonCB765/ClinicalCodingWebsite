@@ -65,6 +65,36 @@ class ConceptCollection(metaclass=ABCMeta):
         self._conceptDefinitions = defaultdict(lambda: {"Positive": {"Codes": [], "Terms": []},
                                                         "Negative": {"Codes": [], "Terms": []}})
 
+    def _clean_term(self, term):
+        """Clean a term by turning consecutive whitespace into a single space.
+
+        Whitespace within quotations is not altered. For example,
+        '  the    dog \t\t  " jumped   over   the    "     fence    '
+        becomes:
+        'the dog " jumped   over   the    " fence'
+
+        :param term:    The term to clean.
+        :type term:     str
+        :return:        The cleaned term.
+        :rtype:         str
+
+        """
+
+        findWhitespace = re.compile("\s+")  # Used to replace white space.
+
+        currentTermIndex = 0  # The current position in the string to begin the whitespace removal at.
+        newTerm = ""  # The new whitespace stripped term being constructed.
+        for i in re.finditer('(".*?")', term.strip()):
+            # Find all sections of non-overlapping quoted characters (matching starts form the left).
+            # For each match we take the characters between it and the end of the previous match and convert any
+            # whitespace into a single space.
+            subString = findWhitespace.sub(' ', term[currentTermIndex:i.span()[0]])
+            newTerm += subString + i.group()  # Added the whitespace subbed string and the match to the new term.
+            currentTermIndex = i.span()[1] + 1
+        subString = findWhitespace.sub(' ', term[currentTermIndex:])  # Substitute in the string after the final match.
+        newTerm += subString
+        return newTerm
+
     @staticmethod
     def validate_concept_file(uploadContents, fileFormat, isFileUploaded):
         """Function to validate a file of concept definitions.
@@ -172,8 +202,9 @@ class _FlatFileDefinitions(ConceptCollection):
         # Initialise the super class.
         super(_FlatFileDefinitions).__init__(fileConceptDefinitions)
 
-        # Compile the cde cleaning regular expression.
-        codeCleaner = re.compile("([^a-zA-Z0-9%]|%(?!$))")
+        # Compile the needed regular expressions.
+        whitespaceRemover = re.compile("\s+")  # Used to replace white space.
+        codeCleaner = re.compile("\.+$")  # Used to strip trailing full stops from codes.
 
         # Extract concept definitions.
         currentConcept = None  # The current concept having its terms/codes extracted.
@@ -181,33 +212,36 @@ class _FlatFileDefinitions(ConceptCollection):
         with open(fileConceptDefinitions, 'r') as fidConceptDefinitions:
             for line in fidConceptDefinitions:
                 line = line.strip()
-                if line[:2] == "##":
-                    # Found a header for the terms/codes, so update whether the following ones are positive or negative.
-                    if line[2:].strip().lower() == "positive":
-                        currentSection = "Positive"
-                    elif line[2:].strip().lower() == "negative":
-                        currentSection = "Negative"
+                if not line:
+                    # The line has no content on it.
+                    pass
                 elif line[0] == '#':
                     # Found the start of a new concept.
-                    currentConcept = re.sub("\s+", '_', line[1:].strip())  # Record the new concept (no whitespace).
+                    currentConcept = line[1:].strip()  # Record the new concept.
                     if currentConcept not in self._concepts:
                         # If the current concept is not in the list of concepts, then add it.
                         self._concepts.append(currentConcept)
                     currentSection = "Positive"  # Reset the default term/code type back to positive.
-                elif line == '':
-                    # The line has no content on it.
-                    pass
+                elif line[0] == "$":
+                    # Found a control term. Check whether it indicates positive or negative aspects of a concept.
+                    cleanedLine = whitespaceRemover.sub('', line[1:])
+                    if cleanedLine.lower() == "positive":
+                        currentSection = "Positive"
+                    elif cleanedLine.lower() == "negative":
+                        currentSection = "Negative"
                 elif line[0] == '>':
                     # Found a concept defining code.
                     code = line[1:].strip()
-                    # Clean the code. Remove all non-alphanumeric characters, except for a final % if one is present.
+                    # Clean the code. Remove all trailing full stops.
                     code = codeCleaner.sub('', code)
                     self._conceptDefinitions[currentConcept][currentSection]["Codes"].append(code)
+                elif line[0] == '%':
+                    # Found a comment line.
+                    pass
                 else:
                     # Found a concept defining term.
-                    rawTerm = line.strip()
-                    rawTerm = re.sub("\s+", ' ', rawTerm)  # Turn consecutive whitespace into a single space.
-                    self._conceptDefinitions[currentConcept][currentSection]["Terms"].append(rawTerm)
+                    cleanTerm = self._clean_term(line)  # Remove excess whitespace from the term.
+                    self._conceptDefinitions[currentConcept][currentSection]["Terms"].append(cleanTerm)
 
 
 class _JSONDefinitions(ConceptCollection):
@@ -224,8 +258,8 @@ class _JSONDefinitions(ConceptCollection):
         # Initialise the super class.
         super(_JSONDefinitions).__init__(fileConceptDefinitions)
 
-        # Compile the cde cleaning regular expression.
-        codeCleaner = re.compile("([^a-zA-Z0-9%]|%(?!$))")
+        # Compile the needed regular expressions.
+        codeCleaner = re.compile("\.+$")  # Used to strip trailing full stops from codes.
 
         # Load the definitions.
         fidConceptDefinitions = open(fileConceptDefinitions, 'r')
@@ -234,18 +268,18 @@ class _JSONDefinitions(ConceptCollection):
 
         # Remove unnecessary fields and convert any term/code values that are dictionaries to lists. The conversion
         # just keeps the keys from the dictionary, but will result in an arbitrary ordering.
-        for i in jsonContent:
+        for concept in jsonContent:
             # Iterate through concepts.
-            for j in jsonContent[i]:
-                # Iterate through the level where positive and negative fields be.
-                for k in jsonContent[i][j]:
-                    # Iterate through the level where term and code fields should be.
-                    if k in ["Codes", "Terms"]:
-                        self._conceptDefinitions[i][j][k] = list(jsonContent[i][j][k])
-
-        # Clean the codes in the JSON data to remove all non-alphanumeric characters, except for a final % sign if one
-        # is present.
-        for i in self._conceptDefinitions:
-            for j in self._conceptDefinitions[i]:
-                self._conceptDefinitions[i][j]["Codes"] = \
-                    [codeCleaner.sub('', k) for k in self._conceptDefinitions[i][j]["Codes"]]
+            for field in jsonContent[concept]:
+                # Iterate through the level where positive and negative fields should be.
+                if field in ["Positive", "Negative"]:
+                    for definition in jsonContent[concept][field]:
+                        # Iterate through the level where term and code fields should be.
+                        if definition == "Codes":
+                            # Clean the codes to remove training spaces.
+                            self._conceptDefinitions[concept][field][definition] = \
+                                [codeCleaner.sub('', i) for i in jsonContent[concept][field][definition]]
+                        elif definition == "Terms":
+                            # Clean the terms to remove excess whitespace.
+                            self._conceptDefinitions[concept][field][definition] = \
+                                [self._clean_term(i) for i in jsonContent[concept][field][definition]]

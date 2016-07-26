@@ -23,6 +23,7 @@ class Config(object):
 
 class ProductionConfigLocal(Config):
     """Production configuration when running Neo4j locally."""
+
     DATABASE_URI = "bolt://localhost:7687/"
 
 
@@ -32,6 +33,7 @@ class ProductionConfigRemote(Config):
     The URI will need filling in with the correct instance.
 
     """
+
     DATABASE_URI = "bolt://ec2-**-***-**-***.eu-west-1.compute.amazonaws.com:7687"
 
 

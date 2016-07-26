@@ -21,8 +21,18 @@ class Config(object):
     WTF_CSRF_SECRET_KEY = SECRET_KEY = "Some Random Secret String"  # Setup the csrf and regular Flask secret keys.
 
 
-class ProductionConfig(Config):
+class ProductionConfigLocal(Config):
+    """Production configuration when running Neo4j locally."""
     DATABASE_URI = "bolt://localhost:7687/"
+
+
+class ProductionConfigRemote(Config):
+    """Production configuration when running Neo4j remotely.
+
+    The URI will need filling in with the correct instance.
+
+    """
+    DATABASE_URI = "bolt://ec2-**-***-**-***.eu-west-1.compute.amazonaws.com:7687"
 
 
 class DevelopmentConfig(Config):

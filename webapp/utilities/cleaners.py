@@ -28,10 +28,12 @@ def input_word_cleaner(words):
     # Clean start and end punctuation.
     cleanedWords = []
     for i in subsetWords:
-        if i[0] in endPunctuation:
+        while i and i[0] in endPunctuation:
             i = i[1:]
-        if i[-1] in endPunctuation:
+        while i and i[-1] in endPunctuation:
             i = i[:-1]
-        cleanedWords.append(i)
+        if i:
+            # If there is anything left of the word, then record it.
+            cleanedWords.append(i)
 
     return cleanedWords

@@ -65,44 +65,53 @@ def main(dirNeo4jData, readV2Files):
         # Record the concept updates needed.
         conceptsToAdd = currentConcepts.keys() - previousConcepts.keys()
         conceptsToAdd = [currentConcepts[i] for i in sorted(conceptsToAdd)]
-        fidAddConcepts.write('\n'.join(conceptsToAdd))
-        fidAddConcepts.write('\n')
+        if conceptsToAdd:
+            fidAddConcepts.write('\n'.join(conceptsToAdd))
+            fidAddConcepts.write('\n')
         conceptsToUpdate = [currentConcepts[i] for i in currentConcepts
                             if i in previousConcepts and currentConcepts[i] != previousConcepts[i]]
-        fidUpdateConcepts.write('\n'.join(conceptsToUpdate))
-        fidUpdateConcepts.write('\n')
+        if conceptsToUpdate:
+            fidUpdateConcepts.write('\n'.join(conceptsToUpdate))
+            fidUpdateConcepts.write('\n')
         conceptsToRemove = previousConcepts.keys() - currentConcepts.keys()
         conceptsToRemove = ["{0:s}\t\t\t\t\t\t\tReadV2_Concept".format(i) for i in conceptsToRemove]
-        fidRemoveConcepts.write('\n'.join(conceptsToRemove))
-        fidRemoveConcepts.write('\n')
+        if conceptsToRemove:
+            fidRemoveConcepts.write('\n'.join(conceptsToRemove))
+            fidRemoveConcepts.write('\n')
 
         # Record the term updates needed.
         termsToAdd = currentTerms.keys() - previousTerms.keys()
         termsToAdd = [currentTerms[i] for i in termsToAdd]
-        fidAddTerms.write('\n'.join(termsToAdd))
-        fidAddTerms.write('\n')
+        if termsToAdd:
+            fidAddTerms.write('\n'.join(termsToAdd))
+            fidAddTerms.write('\n')
         termsToUpdate = [currentTerms[i] for i in currentTerms
                          if i in previousTerms and currentTerms[i] != previousTerms[i]]
-        fidUpdateTerms.write('\n'.join(termsToUpdate))
-        fidUpdateTerms.write('\n')
+        if termsToUpdate:
+            fidUpdateTerms.write('\n'.join(termsToUpdate))
+            fidUpdateTerms.write('\n')
         termsToRemove = previousTerms.keys() - currentTerms.keys()
         termsToRemove = ["{0:s}\t\t\t\t\t\t\tReadV2_Term".format(i) for i in termsToRemove]
-        fidRemoveTerms.write('\n'.join(termsToRemove))
-        fidRemoveTerms.write('\n')
+        if termsToRemove:
+            fidRemoveTerms.write('\n'.join(termsToRemove))
+            fidRemoveTerms.write('\n')
 
         # Record the relationship updates needed.
         relationshipsToAdd = currentRelationships.keys() - previousRelationships.keys()
         relationshipsToAdd = [currentRelationships[i] for i in relationshipsToAdd]
-        fidAddRelationships.write('\n'.join(relationshipsToAdd))
-        fidAddRelationships.write('\n')
+        if relationshipsToAdd:
+            fidAddRelationships.write('\n'.join(relationshipsToAdd))
+            fidAddRelationships.write('\n')
         relationshipsToUpdate = [currentRelationships[i] for i in currentRelationships
                                  if i in previousRelationships and currentRelationships[i] != previousRelationships[i]]
-        fidUpdateRelationships.write('\n'.join(relationshipsToUpdate))
-        fidUpdateRelationships.write('\n')
+        if relationshipsToUpdate:
+            fidUpdateRelationships.write('\n'.join(relationshipsToUpdate))
+            fidUpdateRelationships.write('\n')
         relationshipsToRemove = previousRelationships.keys() - currentRelationships.keys()
         relationshipsToRemove = [previousRelationships[i] for i in relationshipsToRemove]
-        fidRRemoveRelationships.write('\n'.join(relationshipsToRemove))
-        fidRRemoveRelationships.write('\n')
+        if relationshipsToRemove:
+            fidRRemoveRelationships.write('\n'.join(relationshipsToRemove))
+            fidRRemoveRelationships.write('\n')
 
         # Determine the words to add and remove.
         wordsToAdd = allCurrentWords - allPreviousWords

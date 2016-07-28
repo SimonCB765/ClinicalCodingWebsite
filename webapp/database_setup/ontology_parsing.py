@@ -136,7 +136,7 @@ def parse_ReadV2(fileReadV2Data):
 
     # Compile the regular expression needed.
     wordFinder = re.compile("\s+")  # Expression to split words based on arbitrary whitespace between them.
-    bracketFinder = re.compile("^\[[a-zA-Z]+\]\s+")  # Used to remove bracketed letters at the start of a description.
+    bracketFinder = re.compile("(\[.*\])\s*")  # Used to remove bracketed contents in a description.
 
     # Parse the Read V2 data.
     with gzip.open(fileReadV2Data, 'r') as fidReadV2Data:

@@ -61,7 +61,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         wordTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidWordsRemove:
             word, label = (line.strip()).split(delimiter)
-            wordTransaction.run("DETACH DELETE (w:Word {{word: \"{0:s}\"}})".format(word))
+            wordTransaction.run("DETACH DELETE (w:Word {word: {word}})", {"word": word})
             transactionLines += 1
 
             # Determine if a new transaction needs creating.
@@ -84,7 +84,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         wordTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidWordsAdd:
             word, label = (line.strip()).split(delimiter)
-            wordTransaction.run("CREATE (w:Word {{word: \"{0:s}\"}})".format(word))
+            wordTransaction.run("CREATE (w:Word {word: {word}})", {"word": word})
             transactionLines += 1
 
             # Determine if a new transaction needs creating.
@@ -110,7 +110,8 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         termTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidTermsRemove:
             term, current, prettyDescription, searchableDescription, label = (line.strip()).split(delimiter)
-            termTransaction.run("DETACH DELETE (t:{0:s} {{id: \"{1:s}\"}})".format(label, term))
+            query = ("DETACH DELETE (t:{0:s} {{id: {{id}}}})".format(label))
+            termTransaction.run(query, {"id": term})
             transactionLines += 1
 
             # Determine if a new transaction needs creating.
@@ -133,9 +134,12 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         termTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidTermsUpdate:
             term, current, prettyDescription, searchableDescription, label = (line.strip()).split(delimiter)
-            termTransaction.run("MERGE (t:{0:s} {{id: \"{1:s}\"}}) "
-                                "SET t = {{current: \"{2:s}\", pretty: \"{3:s}\", searchable: \"{4:s}\"}}"
-                                .format(label, term, current, prettyDescription, searchableDescription))
+            query = ("MERGE (t:{0:s} {{id: {{id}}}}) "
+                     "SET t = {{current: {{current}}, pretty: {{pretty}}, searchable: {{searchable}}}})"
+                     .format(label))
+            termTransaction.run(
+                query,
+                {"current": current, "id": term, "pretty": prettyDescription, "searchable": searchableDescription})
             transactionLines += 1
 
             # Determine if a new transaction needs creating.
@@ -158,9 +162,12 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         termTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidTermsAdd:
             term, current, prettyDescription, searchableDescription, label = (line.strip()).split(delimiter)
-            termTransaction.run("CREATE (t:{0:s} {{id: \"{1:s}\", pretty: \"{2:s}\", searchable: \"{3:s}\", "
-                                "current: \"{4:s}\"}})"
-                                .format(label, term, prettyDescription, searchableDescription, current))
+            query = ("CREATE (t:{0:s} {{current: {{current}}, id: {{id}}, pretty: {{pretty}}, "
+                     "searchable: {{searchable}}}})"
+                     .format(label))
+            termTransaction.run(
+                query,
+                {"current": current, "id": term, "pretty": prettyDescription, "searchable": searchableDescription})
             transactionLines += 1
 
             # Determine if a new transaction needs creating.
@@ -186,7 +193,8 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         conceptTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidConceptsRemove:
             concept, current, domain, level, label = (line.strip()).split(delimiter)
-            conceptTransaction.run("DETACH DELETE (c:{0:s} {{id: \"{1:s}\"}})".format(label, concept))
+            query = ("DETACH DELETE (c:{0:s} {{id: {{id}}}})".format(label))
+            conceptTransaction.run(query, {"id": concept})
             transactionLines += 1
 
             # Determine if a new transaction needs creating.
@@ -209,9 +217,13 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         conceptTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidConceptsUpdate:
             concept, current, domain, level, label = (line.strip()).split(delimiter)
-            conceptTransaction.run("MERGE (c:{0:s} {{id: \"{1:s}\"}}) "
-                                   "SET t = {{current: \"{2:s}\", domain: \"{3:s}\", level: toInt({4:s})}}"
-                                   .format(label, concept, current, domain, level))
+            query = ("MERGE (c:{0:s} {{id: {{id}}}}) "
+                     "SET t = {{current: {{current}}, domain: {{domain}}, level: toInt({{level}})}})"
+                     .format(label))
+            conceptTransaction.run(
+                query,
+                {"current": current, "domain": domain, "id": concept, "level": level})
+            transactionLines += 1
 
             # Determine if a new transaction needs creating.
             if transactionLines == transactionSize:
@@ -233,9 +245,11 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         conceptTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidConceptsAdd:
             concept, current, domain, level, label = (line.strip()).split(delimiter)
-            conceptTransaction.run("CREATE (c:{0:s} {{id: \"{1:s}\", current: \"{2:s}\", domain: \"{3:s}\", "
-                                   "level: toInt({4:s})}})"
-                                   .format(label, concept, current, domain, level))
+            query = ("CREATE (c:{0:s} {{current: {{current}}, domain: {{domain}}, id: {{id}}, level: {{level}}}})"
+                     .format(label))
+            conceptTransaction.run(
+                query,
+                {"current": current, "domain": domain, "id": concept, "level": level})
             transactionLines += 1
 
             # Determine if a new transaction needs creating.

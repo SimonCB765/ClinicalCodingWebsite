@@ -34,9 +34,9 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
 
     # Get access to the database.
     driver = neo.GraphDatabase.driver(databaseURI, auth=neo.basic_auth(databaseUsername, databasePassword))
-    session = driver.session()
 
     # Create constraints and indices as a single transaction.
+    session = driver.session()
     constraintTransaction = session.begin_transaction()
 
     # Ensure each word is unique (and set up the index as a side effect).
@@ -48,6 +48,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         constraintTransaction.run("CREATE CONSTRAINT ON (concept:{0:s}_Concept) ASSERT concept.id IS UNIQUE".format(i))
         constraintTransaction.run("CREATE CONSTRAINT ON (concept:{0:s}_Term) ASSERT concept.id IS UNIQUE".format(i))
     constraintTransaction.commit()
+    session.close()
 
     #----------------------------------#
     # Update the Words in the Database #
@@ -56,6 +57,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
     transactionLines = 0  # Record of the number of lines used to construct the current transaction.
     with open(os.path.join(dirNeo4jData, "Words_Remove.tsv"), 'r') as fidWordsRemove:
         _ = fidWordsRemove.readline()  # Strip off the header.
+        session = driver.session()
         wordTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidWordsRemove:
             word = line.strip()
@@ -65,14 +67,20 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
             # Determine if a new transaction needs creating.
             if transactionLines == transactionSize:
                 wordTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
                 wordTransaction = session.begin_transaction()  # Start the next transaction.
                 transactionLines = 0
         wordTransaction.commit()  # Commit the final transaction.
+        session.close()
 
     # Add new words.
     transactionLines = 0  # Record of the number of lines used to construct the current transaction.
     with open(os.path.join(dirNeo4jData, "Words_Add.tsv"), 'r') as fidWordsAdd:
         _ = fidWordsAdd.readline()  # Strip off the header.
+        session = driver.session()
         wordTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidWordsAdd:
             word = line.strip()
@@ -82,9 +90,14 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
             # Determine if a new transaction needs creating.
             if transactionLines == transactionSize:
                 wordTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
                 wordTransaction = session.begin_transaction()  # Start the next transaction.
                 transactionLines = 0
         wordTransaction.commit()  # Commit the final transaction.
+        session.close()
 
     #----------------------------------#
     # Update the Terms in the Database #
@@ -93,6 +106,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
     transactionLines = 0  # Record of the number of lines used to construct the current transaction.
     with open(os.path.join(dirNeo4jData, "Terms_Remove.tsv"), 'r') as fidTermsRemove:
         _ = fidTermsRemove.readline()  # Strip off the header.
+        session = driver.session()
         termTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidTermsRemove:
             term, current, prettyDescription, searchableDescription, label = (line.strip()).split(delimiter)
@@ -102,14 +116,20 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
             # Determine if a new transaction needs creating.
             if transactionLines == transactionSize:
                 termTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
                 termTransaction = session.begin_transaction()  # Start the next transaction.
                 transactionLines = 0
         termTransaction.commit()  # Commit the final transaction.
+        session.close()
 
     # Update existing terms.
     transactionLines = 0  # Record of the number of lines used to construct the current transaction.
     with open(os.path.join(dirNeo4jData, "Terms_Update.tsv"), 'r') as fidTermsUpdate:
         _ = fidTermsUpdate.readline()  # Strip off the header.
+        session = driver.session()
         termTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidTermsUpdate:
             term, current, prettyDescription, searchableDescription, label = (line.strip()).split(delimiter)
@@ -121,14 +141,20 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
             # Determine if a new transaction needs creating.
             if transactionLines == transactionSize:
                 termTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
                 termTransaction = session.begin_transaction()  # Start the next transaction.
                 transactionLines = 0
         termTransaction.commit()  # Commit the final transaction.
+        session.close()
 
     # Add new terms.
     transactionLines = 0  # Record of the number of lines used to construct the current transaction.
     with open(os.path.join(dirNeo4jData, "Terms_Add.tsv"), 'r') as fidTermsAdd:
         _ = fidTermsAdd.readline()  # Strip off the header.
+        session = driver.session()
         termTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidTermsAdd:
             term, current, prettyDescription, searchableDescription, label = (line.strip()).split(delimiter)
@@ -140,9 +166,14 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
             # Determine if a new transaction needs creating.
             if transactionLines == transactionSize:
                 termTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
                 termTransaction = session.begin_transaction()  # Start the next transaction.
                 transactionLines = 0
         termTransaction.commit()  # Commit the final transaction.
+        session.close()
 
     #-------------------------------------#
     # Update the Concepts in the Database #
@@ -151,6 +182,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
     transactionLines = 0  # Record of the number of lines used to construct the current transaction.
     with open(os.path.join(dirNeo4jData, "Concepts_Remove.tsv"), 'r') as fidConceptsRemove:
         _ = fidConceptsRemove.readline()  # Strip off the header.
+        session = driver.session()
         conceptTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidConceptsRemove:
             concept, current, domain, level, label = (line.strip()).split(delimiter)
@@ -160,14 +192,20 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
             # Determine if a new transaction needs creating.
             if transactionLines == transactionSize:
                 conceptTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
                 conceptTransaction = session.begin_transaction()  # Start the next transaction.
                 transactionLines = 0
         conceptTransaction.commit()  # Commit the final transaction.
+        session.close()
 
     # Update existing terms.
     transactionLines = 0  # Record of the number of lines used to construct the current transaction.
     with open(os.path.join(dirNeo4jData, "Concepts_Update.tsv"), 'r') as fidConceptsUpdate:
         _ = fidConceptsUpdate.readline()  # Strip off the header.
+        session = driver.session()
         conceptTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidConceptsUpdate:
             concept, current, domain, level, label = (line.strip()).split(delimiter)
@@ -178,14 +216,20 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
             # Determine if a new transaction needs creating.
             if transactionLines == transactionSize:
                 conceptTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
                 conceptTransaction = session.begin_transaction()  # Start the next transaction.
                 transactionLines = 0
         conceptTransaction.commit()  # Commit the final transaction.
+        session.close()
 
     # Add new terms.
     transactionLines = 0  # Record of the number of lines used to construct the current transaction.
     with open(os.path.join(dirNeo4jData, "Concepts_Add.tsv"), 'r') as fidConceptsAdd:
         _ = fidConceptsAdd.readline()  # Strip off the header.
+        session = driver.session()
         conceptTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidConceptsAdd:
             concept, current, domain, level, label = (line.strip()).split(delimiter)
@@ -197,8 +241,11 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
             # Determine if a new transaction needs creating.
             if transactionLines == transactionSize:
                 conceptTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
                 conceptTransaction = session.begin_transaction()  # Start the next transaction.
                 transactionLines = 0
         conceptTransaction.commit()  # Commit the final transaction.
-
-    session.close()
+        session.close()

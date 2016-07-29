@@ -1,14 +1,10 @@
 """Update a Neo4j database of concepts."""
 
 # Python imports.
-import logging
 import os
 
 # 3rd party imports.
 import neo4j.v1 as neo
-
-# Globals.
-LOGGER = logging.getLogger(__name__)
 
 
 def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsSupported=("ReadV2",),
@@ -331,9 +327,9 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         for line in fidRelationshipsAdd:
             source, sourceLabel, target, targetLabel, relType, relLabels = (line.strip()).split(delimiter)
             query = ("MATCH (s:{0:s} {{id: {{source}}}}) "
-                     "MATCH (t:{1:s} {{id: {{target}}}}) "
-                     "CREATE (s) -[r:{2:s} {{type: {{type}}}}]-> (t)"
-                     .format(sourceLabel, targetLabel, relLabels))
+                     "MATCH (t:{1:s} {{{2:s}: {{target}}}}) "
+                     "CREATE (s) -[r:{3:s} {{type: {{type}}}}]-> (t)"
+                     .format(sourceLabel, targetLabel, "word" if targetLabel == "Word" else "id", relLabels))
             relationshipTransaction.run(query, {"source": source, "target": target, "type": relType})
             transactionLines += 1
 

@@ -1,8 +1,5 @@
 """Functions to clean various strings needed by the application."""
 
-# Python imports.
-import re
-
 
 def input_word_cleaner(words):
     """Clean a collection of words to remove stop words, undesirable punctuation, etc.

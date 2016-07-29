@@ -209,7 +209,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         conceptTransaction.commit()  # Commit the final transaction.
         session.close()
 
-    # Update existing terms.
+    # Update existing concepts.
     transactionLines = 0  # Record of the number of lines used to construct the current transaction.
     with open(os.path.join(dirNeo4jData, "Concepts_Update.tsv"), 'r') as fidConceptsUpdate:
         _ = fidConceptsUpdate.readline()  # Strip off the header.
@@ -237,7 +237,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         conceptTransaction.commit()  # Commit the final transaction.
         session.close()
 
-    # Add new terms.
+    # Add new concepts.
     transactionLines = 0  # Record of the number of lines used to construct the current transaction.
     with open(os.path.join(dirNeo4jData, "Concepts_Add.tsv"), 'r') as fidConceptsAdd:
         _ = fidConceptsAdd.readline()  # Strip off the header.

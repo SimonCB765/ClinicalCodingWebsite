@@ -24,7 +24,7 @@ def input_word_cleaner(words):
     wordsToRemove |= endPunctuation
 
     # Strip words that need removing, and convert all " to ' as " can not be in a Neo4j property value.
-    subsetWords = [i.replace('"', "'") for i in words if i not in wordsToRemove]
+    subsetWords = [i for i in words if i not in wordsToRemove]
 
     # Clean start and end punctuation.
     cleanedWords = []

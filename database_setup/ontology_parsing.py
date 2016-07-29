@@ -64,7 +64,7 @@ def main(dirNeo4jData, readV2Files):
 
         # Record the concept updates needed.
         conceptsToAdd = currentConcepts.keys() - previousConcepts.keys()
-        conceptsToAdd = [currentConcepts[i] for i in sorted(conceptsToAdd)]
+        conceptsToAdd = [currentConcepts[i] for i in conceptsToAdd]
         if conceptsToAdd:
             fidAddConcepts.write('\n'.join(conceptsToAdd))
             fidAddConcepts.write('\n')

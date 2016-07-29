@@ -140,7 +140,7 @@ def parse_ReadV2(fileReadV2Data):
     concepts = dict()
     domains = dict()
     terms = dict()
-    words = set()
+    words = []
     relationships = dict()
 
     # Compile the regular expression needed.
@@ -177,7 +177,7 @@ def parse_ReadV2(fileReadV2Data):
             if isBracketedStart:
                 splittableDescription = splittableDescription[isBracketedStart.span()[1]:]
             termWords = cleaners.input_word_cleaner(wordFinder.split(splittableDescription))
-            words = words.union(termWords)
+            words.extend(termWords)
 
             # Record the term's attributes. Read V2 has no concept of non-current terms, so all are current.
             terms[termID] = "{0:s}\ttrue\t{1:s}\t{2:s}\tReadV2_Term".format(termID, description, descriptionLower)
@@ -214,6 +214,9 @@ def parse_ReadV2(fileReadV2Data):
     # Add the domain information to the concepts.
     for i in concepts:
         concepts[i] = concepts[i].format(domains["{0:s}".format(i[0])])
+
+    # Remove duplicate words.
+    words = set(words)
 
     return concepts, terms, words, relationships
 

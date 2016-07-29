@@ -15,7 +15,8 @@ def input_word_cleaner(words):
     """
 
     # Identify start and stop punctuation to remove.
-    endPunctuation = {'.', ',', '-', '+', '*', '%', '&', ':', ';', '?', '!', '[', ']', '{', '}', '(', ')', "'", '='}
+    endPunctuation = {'.', ',', '-', '+', '*', '%', '&', ':', ';', '?', '!', '[', ']', '{', '}', '(', ')', "'", '=',
+                      '"'}
 
     # Identify the words (e.g. stop words) and hanging punctuation that should be removed.
     wordsToRemove = {'a', "an", "are", "as", "at", "be", "by", "for", "from", "in", "is", "it", "of", "on", "that",

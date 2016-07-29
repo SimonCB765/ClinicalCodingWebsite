@@ -61,7 +61,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         wordTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidWordsRemove:
             word, label = (line.strip()).split(delimiter)
-            wordTransaction.run("DETACH DELETE (w:Word {word: {word}})", {"word": word})
+            wordTransaction.run("MATCH (w:Word {word: {word}}) DETACH DELETE w", {"word": word})
             transactionLines += 1
 
             # Determine if a new transaction needs creating.
@@ -110,7 +110,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         termTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidTermsRemove:
             term, current, prettyDescription, searchableDescription, label = (line.strip()).split(delimiter)
-            query = ("DETACH DELETE (t:{0:s} {{id: {{id}}}})".format(label))
+            query = ("MATCH (t:{0:s} {{id: {{id}}}}) DETACH DELETE t".format(label))
             termTransaction.run(query, {"id": term})
             transactionLines += 1
 
@@ -193,7 +193,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         conceptTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidConceptsRemove:
             concept, current, domain, level, label = (line.strip()).split(delimiter)
-            query = ("DETACH DELETE (c:{0:s} {{id: {{id}}}})".format(label))
+            query = ("MATCH (c:{0:s} {{id: {{id}}}}) DETACH DELETE c".format(label))
             conceptTransaction.run(query, {"id": concept})
             transactionLines += 1
 

@@ -60,7 +60,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         session = driver.session()
         wordTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidWordsRemove:
-            word = line.strip()
+            word, label = (line.strip()).split(delimiter)
             wordTransaction.run("DETACH DELETE (w:Word {{word: \"{0:s}\"}})".format(word))
             transactionLines += 1
 
@@ -83,7 +83,7 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
         session = driver.session()
         wordTransaction = session.begin_transaction()  # Start the first transaction.
         for line in fidWordsAdd:
-            word = line.strip()
+            word, label = (line.strip()).split(delimiter)
             wordTransaction.run("CREATE (w:Word {{word: \"{0:s}\"}})".format(word))
             transactionLines += 1
 

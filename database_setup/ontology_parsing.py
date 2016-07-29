@@ -196,8 +196,8 @@ def parse_ReadV2(fileReadV2Data):
             # Add the relationship between the concept and the term. For every concept, term ID 00 indicates the
             # primary term, and all other terms are secondary.
             key = tuple(sorted([conceptID, termID]))
-            relationships[key] = "{0:s}\tReadV2_Concept\t{1:s}\tReadV2_Term\t\tDescribedBy,{2:s}".format(
-                conceptID, termID, "Primary" if termIDRoot == "00" else '')
+            relationships[key] = "{0:s}\tReadV2_Concept\t{1:s}\tReadV2_Term\t{2:s}\tDescribedBy".format(
+                conceptID, termID, "true" if termIDRoot == "00" else 'false')
 
             # Add the relationship between the code and its parent. Read V2 parent relationships do not have a 'type',
             # so each parent relationship is given the default type parent.

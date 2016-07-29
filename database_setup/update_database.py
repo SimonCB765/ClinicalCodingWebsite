@@ -263,3 +263,88 @@ def main(dirNeo4jData, databaseURI, databaseUsername, databasePassword, formatsS
                 transactionLines = 0
         conceptTransaction.commit()  # Commit the final transaction.
         session.close()
+
+
+
+
+
+    #------------------------------------------#
+    # Update the Relationships in the Database #
+    #------------------------------------------#
+    # Remove relationships that are no longer needed.
+    transactionLines = 0  # Record of the number of lines used to construct the current transaction.
+    with open(os.path.join(dirNeo4jData, "Relationships_Remove.tsv"), 'r') as fidRelationshipsRemove:
+        _ = fidRelationshipsRemove.readline()  # Strip off the header.
+        session = driver.session()
+        relationshipTransaction = session.begin_transaction()  # Start the first transaction.
+        for line in fidRelationshipsRemove:
+            source, sourceLabel, target, targetLabel, relType, isPrimary, relLabels = (line.strip()).split(delimiter)
+            query = "MATCH (s:{0:s} {{id: {{source}}}}) -[r:{1:s}]-> (t:{2:s} {{id: {{target}}}}) DELETE r".format(
+                sourceLabel, relLabels, targetLabel)
+            relationshipTransaction.run(query, {"source": source, "target": target})
+            transactionLines += 1
+
+            # Determine if a new transaction needs creating.
+            if transactionLines == transactionSize:
+                relationshipTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
+                relationshipTransaction = session.begin_transaction()  # Start the next transaction.
+                transactionLines = 0
+        relationshipTransaction.commit()  # Commit the final transaction.
+        session.close()
+
+    # Update existing relationships.
+    transactionLines = 0  # Record of the number of lines used to construct the current transaction.
+    with open(os.path.join(dirNeo4jData, "Relationships_Update.tsv"), 'r') as fidRelationshipsUpdate:
+        _ = fidRelationshipsUpdate.readline()  # Strip off the header.
+        session = driver.session()
+        relationshipTransaction = session.begin_transaction()  # Start the first transaction.
+        for line in fidRelationshipsUpdate:
+            source, sourceLabel, target, targetLabel, relType, relLabels = (line.strip()).split(delimiter)
+            query = ("MERGE (s:{0:s} {{id: {{source}}}}) -[r:{1:s}]-> (t:{2:s} {{id: {{target}}}} "
+                     "SET r = {{type: {{type}}}}"
+                     .format(sourceLabel, relLabels, targetLabel))
+            relationshipTransaction.run(query, {"source": source, "target": target, "type": relType})
+            transactionLines += 1
+
+            # Determine if a new transaction needs creating.
+            if transactionLines == transactionSize:
+                relationshipTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
+                relationshipTransaction = session.begin_transaction()  # Start the next transaction.
+                transactionLines = 0
+        relationshipTransaction.commit()  # Commit the final transaction.
+        session.close()
+
+    # Add new relationships.
+    transactionLines = 0  # Record of the number of lines used to construct the current transaction.
+    with open(os.path.join(dirNeo4jData, "Relationships_Add.tsv"), 'r') as fidRelationshipsAdd:
+        _ = fidRelationshipsAdd.readline()  # Strip off the header.
+        session = driver.session()
+        relationshipTransaction = session.begin_transaction()  # Start the first transaction.
+        for line in fidRelationshipsAdd:
+            source, sourceLabel, target, targetLabel, relType, relLabels = (line.strip()).split(delimiter)
+            query = ("MATCH (s:{0:s} {{id: {{source}}}}) "
+                     "MATCH (t:{1:s} {{id: {{target}}}}) "
+                     "CREATE (s) -[r:{2:s} {{type: {{type}}}}]-> (t)"
+                     .format(sourceLabel, targetLabel, relLabels))
+            relationshipTransaction.run(query, {"source": source, "target": target, "type": relType})
+            transactionLines += 1
+
+            # Determine if a new transaction needs creating.
+            if transactionLines == transactionSize:
+                relationshipTransaction.commit()
+                # Transactions only execute when closing the session, so close and open a new one to prevent a loooong
+                # hang at the end of the word adding.
+                session.close()
+                session = driver.session()
+                relationshipTransaction = session.begin_transaction()  # Start the next transaction.
+                transactionLines = 0
+        relationshipTransaction.commit()  # Commit the final transaction.
+        session.close()

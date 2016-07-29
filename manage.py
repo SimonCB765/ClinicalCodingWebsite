@@ -13,6 +13,12 @@ manager = Manager(app)
 
 
 @manager.command
+def run_dev():
+    """Run the development server."""
+    app.run(debug=True)
+
+
+@manager.command
 def setup_database():
     """Update the contents of the Neo4j database backing the app."""
 

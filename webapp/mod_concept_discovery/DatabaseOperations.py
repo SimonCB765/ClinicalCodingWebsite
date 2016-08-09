@@ -34,7 +34,8 @@ class DatabaseOperations(object):
         :param phrases:     Sets of phrases. Each entry should contain a set of phrases, all of which must be found in
                                 a code's description before the code is deemed a match.
         :type phrases:      list
-        :param codeFormats: The code formats to look through when extracting descriptions.
+        :param codeFormats: The code formats to look through when extracting descriptions. Acceptable values are
+                                "ReadV2", "CTV3" and "SNOMED_CT".
         :type codeFormats:  list
         :return:            A list of dictionaries. The list contains one element per entry in phrases, with the
                                 returned list at index i containing the result for entry phrases[i]. The ith returned
@@ -67,10 +68,11 @@ class DatabaseOperations(object):
             uniquePhrases = set([j.lower() for j in i])  # Remove any duplicate phrases and make them all lowercase.
             queryResults = {}
             for j in codeFormats:
-                result = session.run("MATCH (c:{0:s}) "
-                                     "WHERE ALL(phrase IN ['{1:s}'] WHERE c.descr_search CONTAINS phrase) "
+                result = session.run("MATCH (c:{0:s}) -[:DescribedBy]-> (t:{1:s}) "
+                                     "WHERE ALL(phrase IN ['{1:s}'] WHERE t.searchable CONTAINS phrase) "
                                      "RETURN c.code AS code"
-                                     .format(j, "', '".join(uniquePhrases)))
+                                     .format("{0:s}_Concept".format(j), "{0:s}_Term".format(j),
+                                             "', '".join(uniquePhrases)))
                 queryResults[j] = {k["code"] for k in result}
 
             # Record the codes with a description that contains all the words in the current bag of words.
@@ -91,7 +93,8 @@ class DatabaseOperations(object):
                                 present in a code's description before the code is deemed to be a match. Each word is
                                 assumed to be a string.
         :type words:        list
-        :param codeFormats: The code formats to look through when extracting descriptions.
+        :param codeFormats: The code formats to look through when extracting descriptions. Acceptable values are
+                                "ReadV2", "CTV3" and "SNOMED_CT".
         :type codeFormats:  list
         :return:            A list of dictionaries. The list contains one element per entry in words, with the returned
                                 list at index i containing the result for entry words[i]. Each returned dictionary
@@ -126,12 +129,13 @@ class DatabaseOperations(object):
             wordBag = {j.lower() for j in i}  # Remove any duplicate words and convert all words to lowercase.
             queryResults = {}
             for j in codeFormats:
-                result = session.run("MATCH (c:{0:s}) -[:DescribedBy]-> (w:Word) "
-                                     "WHERE w.word IN ['{1:s}']"
+                result = session.run("MATCH (c:{0:s}) -[:DescribedBy]-> (:{1:s}) -[:Contains]-> (w:Word) "
+                                     "WHERE w.word IN ['{2:s}']"
                                      "WITH c.code AS code, COLLECT(w.word) AS words "
-                                     "WHERE length(words) = {2:d} "
+                                     "WHERE length(words) = {3:d} "
                                      "RETURN code"
-                                     .format(j, "', '".join(wordBag), len(wordBag)))
+                                     .format("{0:s}_Concept".format(j), "{0:s}_Term".format(j),
+                                             "', '".join(wordBag), len(wordBag)))
                 queryResults[j] = {k["code"] for k in result}
 
             # Record the codes with a description that contains all the words in the current bag of words.
@@ -147,7 +151,8 @@ class DatabaseOperations(object):
 
         :param codes:       The codes to extract the descriptions for.
         :type codes:        list
-        :param codeFormats: The code formats to look through when extracting descriptions.
+        :param codeFormats: The code formats to look through when extracting descriptions. Acceptable values are
+                                "ReadV2", "CTV3" and "SNOMED_CT".
         :type codeFormats:  list
         :return:            The descriptions of the input codes. Each input code is treated as a key in the returned
                                 dictionary. The value associated with a code is a dictionary mapping the codeFormats
@@ -171,10 +176,10 @@ class DatabaseOperations(object):
         # Get the descriptions.
         descriptions = {i: {} for i in codes}
         for i in codeFormats:
-            result = session.run("MATCH (c:{0:s}) "
-                                 "WHERE c.code IN ['{1:s}'] "
-                                 "RETURN c.code AS code, c.descr_pretty AS description"
-                                 .format(i, "', '".join(codes)))
+            result = session.run("MATCH (c:{0:s}) -[r:DescribedBy]-> (t:{1:s}) "
+                                 "WHERE c.code IN ['{2:s}'] "
+                                 "RETURN c.code AS code, t.pretty AS description"
+                                 .format("{0:s}_Concept".format(i), "{0:s}_Term".format(i), "', '".join(codes)))
             for j in result:
                 descriptions[j["code"]][i] = j["description"]
 

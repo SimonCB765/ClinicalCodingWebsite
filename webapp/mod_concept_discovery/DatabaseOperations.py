@@ -130,7 +130,7 @@ class DatabaseOperations(object):
             queryResults = {}
             for j in codeFormats:
                 result = session.run("MATCH (c:{0:s}) -[:DescribedBy]-> (:{1:s}) -[:Contains]-> (w:Word) "
-                                     "WHERE w.word IN ['{2:s}']"
+                                     "WHERE w.word IN ['{2:s}'] "
                                      "WITH c.code AS code, COLLECT(w.word) AS words "
                                      "WHERE length(words) = {3:d} "
                                      "RETURN code"

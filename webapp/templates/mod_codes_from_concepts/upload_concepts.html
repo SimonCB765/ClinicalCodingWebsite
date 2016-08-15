@@ -5,10 +5,10 @@
     <title>Concept Discovery</title>
     <link rel=stylesheet
           type=text/css
-          href="{{ url_for('static', filename='CSS/mod_concept_discovery/concept_form.css') }}">
+          href="{{ url_for('static', filename='CSS/mod_codes_from_concepts/concept_form.css') }}">
 </head>
 <body>
-    <form action="{{ url_for('conceptDiscovery.upload_concepts') }}" enctype="multipart/form-data" method="POST">
+    <form action="{{ url_for('codesFromConcepts.upload_concepts') }}" enctype="multipart/form-data" method="POST">
         {{ form.hidden_tag() }}  <!-- Needed to ensure that wtf finds the CSRF token as part of the form data. -->
 
         <h1>Concept Search</h1>

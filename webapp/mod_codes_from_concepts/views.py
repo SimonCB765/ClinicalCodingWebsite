@@ -17,11 +17,11 @@ def upload_concepts():
         task = long_task.main.apply_async(args=[10, 11])
         return redirect(url_for("conceptDiscovery.view_concepts", taskID=task.id))
 
-    return render_template("mod_concept_discovery/upload_concepts.html", form=uploadForm)
+    return render_template("mod_codes_from_concepts/upload_concepts.html", form=uploadForm)
 
 
 def view_concepts(taskID):
-    return render_template("mod_concept_discovery/view_concepts.html", taskID=taskID)
+    return render_template("mod_codes_from_concepts/view_concepts.html", taskID=taskID)
 
 
 def task_status(taskID):

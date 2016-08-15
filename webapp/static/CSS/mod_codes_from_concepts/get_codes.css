@@ -1,0 +1,17 @@
+footer.navControl {
+    clear: both;
+    margin-bottom: 0;
+    width: 100%;
+}
+
+section.conceptDefs {
+    float: left;
+    margin: 0 1.5%;
+    width: 30%;
+}
+
+section.codeViewer {
+    float: right;
+    margin: 0 1.5%;
+    width: 60%;
+}

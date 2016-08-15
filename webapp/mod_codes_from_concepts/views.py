@@ -8,20 +8,17 @@ from . import forms
 from . import long_task
 
 
-def upload_concepts():
-    """Render and process the page for uploading concepts to be defined."""
+def get_codes():
+    """Render and process the page for extracting codes from concept definitions."""
     uploadForm = forms.ConceptUploadForm()
 
     if uploadForm.validate_on_submit():
         # A POST request was made and the form was successfully validated, so concept discovery can begin.
-        task = long_task.main.apply_async(args=[10, 11])
-        return redirect(url_for("conceptDiscovery.view_concepts", taskID=task.id))
+        pass
+        #task = long_task.main.apply_async(args=[10, 11])
+        #return redirect(url_for("conceptDiscovery.view_concepts", taskID=task.id))
 
-    return render_template("mod_codes_from_concepts/upload_concepts.html", form=uploadForm)
-
-
-def view_concepts(taskID):
-    return render_template("mod_codes_from_concepts/view_concepts.html", taskID=taskID)
+    return render_template("mod_codes_from_concepts/get_codes.html", form=uploadForm)
 
 
 def task_status(taskID):

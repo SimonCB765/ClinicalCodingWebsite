@@ -17,16 +17,16 @@ def get_codes():
     if request.method == 'POST':
         # A POST request was made, so validate the form.
         if uploadForm.validate():
-            response = "SUCCESS"
+            response = jsonify({
+                "response": render_template("mod_codes_from_concepts/concept_form.html", form=uploadForm),
+                "success": True
+            })
         else:
-            response = uploadForm.errors
-        return jsonify(response)
-
-        #if uploadForm.validate_on_submit():
-            # A POST request was made and the form was successfully validated, so concept discovery can begin.
-            #pass
-            #task = long_task.main.apply_async(args=[10, 11])
-            #return redirect(url_for("conceptDiscovery.view_concepts", taskID=task.id))
+            response = jsonify({
+                "response": render_template("mod_codes_from_concepts/concept_form.html", form=uploadForm),
+                "success": False
+            })
+        return response
     else:
         # A GET request was made, so just render the page.
         return render_template("mod_codes_from_concepts/get_codes.html", form=uploadForm)

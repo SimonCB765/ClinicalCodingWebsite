@@ -19,15 +19,20 @@ $(document).ready(function() {
             data: formData,
             processData: false,  // Tell jQuery not to process the data.
             contentType: false,   // Tell jQuery not to set the contentType.
-            success: function(data, status, request) {
-                console.log(data);
-                console.log(status);
+            success: function(data) {
+                if (data["success"]) {
+                    // The form was successfully validated. Use .html rather than .replaceWith to preserve handlers.
+                    form.html(data["response"])
+                }
+                else {
+                    // The submitted form data was invalid. Use .html rather than .replaceWith to preserve handlers.
+                    form.html(data["response"])
+                }
             },
             error: function() {
-                console.log("Unexpected error");
+                console.log("Unexpected Error.");
             }
         });
-        console.log("Submitted");
 
         event.preventDefault();  // Prevent the default submission of the form.
     });

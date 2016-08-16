@@ -6,11 +6,11 @@ footer.navControl {
 section.conceptDefs {
     display: inline-block;
     margin: 0 1.5%;
-    width: 30%;
+    width: 40%;
 }
 
 section.codeViewer {
     display: inline-block;
     margin: 0 1.5%;
-    width: 60%;
+    width: 50%;
 }

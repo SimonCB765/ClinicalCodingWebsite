@@ -10,8 +10,8 @@ $(document).ready(function() {
     })
 
     // Attach a handler to the form submission to deal with form validation and job submission.
+    var form = $("section.conceptDefs form");
     form.submit(function (event) {
-        var form = $("section.conceptDefs form");
         var formData = new FormData(form.get(0));
         $.ajax({
             type: form.attr("method"),

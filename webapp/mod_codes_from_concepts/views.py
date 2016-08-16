@@ -1,7 +1,7 @@
 """Handlers for the pages made available by this blueprint."""
 
 # Flask imports.
-from flask import jsonify, redirect, render_template, url_for
+from flask import jsonify, redirect, render_template, request, url_for
 
 # User imports.
 from . import forms
@@ -10,15 +10,26 @@ from . import long_task
 
 def get_codes():
     """Render and process the page for extracting codes from concept definitions."""
+
+    # Get the form for displaying or validating.
     uploadForm = forms.ConceptUploadForm()
 
-    if uploadForm.validate_on_submit():
-        # A POST request was made and the form was successfully validated, so concept discovery can begin.
-        pass
-        #task = long_task.main.apply_async(args=[10, 11])
-        #return redirect(url_for("conceptDiscovery.view_concepts", taskID=task.id))
+    if request.method == 'POST':
+        # A POST request was made, so validate the form.
+        if uploadForm.validate():
+            response = "SUCCESS"
+        else:
+            response = uploadForm.errors
+        return jsonify(response)
 
-    return render_template("mod_codes_from_concepts/get_codes.html", form=uploadForm)
+        #if uploadForm.validate_on_submit():
+            # A POST request was made and the form was successfully validated, so concept discovery can begin.
+            #pass
+            #task = long_task.main.apply_async(args=[10, 11])
+            #return redirect(url_for("conceptDiscovery.view_concepts", taskID=task.id))
+    else:
+        # A GET request was made, so just render the page.
+        return render_template("mod_codes_from_concepts/get_codes.html", form=uploadForm)
 
 
 def task_status(taskID):

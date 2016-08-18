@@ -47,7 +47,7 @@ div.conceptSearch {
 /*
 Concept form declarations.
 */
-#conceptDefs form {
+#conceptDefs .conceptForm {
     display: table-cell;
     vertical-align:middle;
 }

@@ -72,7 +72,7 @@ class MultiCheckboxField(SelectMultipleField):
 class ConceptDefinitionForm(Form):
     """Class representing the form for uploading information about the concepts to find codes for."""
 
-    codes = TextAreaField("Defining Codes")
+    codes = TextAreaField("Additional Codes")
     codeFormats = RadioField(choices=[("ReadV2", "Read v2"), ("CTV3", "CTV3"), ("SNOMED_CT", "SNOMED-CT")],
                              default="ReadV2")
     conceptName = StringField("Concept Name")

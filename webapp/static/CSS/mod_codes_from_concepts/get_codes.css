@@ -1,12 +1,12 @@
 body {
     margin: 0;
+    min-height: 625px;
     min-width: 800px;
     white-space: nowrap;
 }
 
 textarea {
     font-size: 1.1em;
-    height: 7em;
     margin: 0;
     margin-bottom: 1em;
     padding: 0;
@@ -36,10 +36,8 @@ div.conceptSearch {
 }
 
 #navControl {
-    bottom: 0;
     clear: both;
-    margin: 2em 0 1em 0;
-    position: fixed;
+    padding: 2em 0 1em 0;
     text-align: center;
     width: 100%;
 }
@@ -96,4 +94,16 @@ Concept form declarations.
 
 #defUpdate input {
     margin: 0 1em;
+}
+
+#positiveTerms {
+    height: 10em;
+}
+
+#negativeTerms {
+    height: 4em;
+}
+
+#codes {
+    height: 4em;
 }

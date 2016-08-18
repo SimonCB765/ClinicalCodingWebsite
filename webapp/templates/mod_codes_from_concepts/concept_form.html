@@ -1,50 +1,43 @@
-<form action="{{ url_for('codesFromConcepts.get_codes') }}" enctype="multipart/form-data" method="POST">
+<form action="{{ url_for('codesFromConcepts.get_codes') }}" class="conceptDefs" enctype="multipart/form-data" method="POST">
     {{ form.hidden_tag() }}  <!-- Needed to ensure that wtf finds the CSRF token as part of the form data. -->
-    <h1>Concept Search</h1>
-    <hr>
     {% if form.errors %}
         <p class="errorsPresent">
             Sorry, something went wrong. Please check the form for errors, correct them and submit again.
         </p>
+    {% elif form.saveDefinition.data %}
+        <p class="saveSuccess">
+            Concept successfully saved.
+        </p>
     {% endif %}
     <section>
-        <fieldset class={{ "errorsPresent" if form.conceptSubmit.errors else "" }}>
-            <legend>Concept Upload Options</legend>
-            {% if form.conceptSubmit.errors %}
-                {% for error in form.conceptSubmit.errors %}
+        <fieldset class={{ "errorsPresent" if form.updateDefinition.errors else "" }}>
+            <legend>Concept Definition</legend>
+            {% if form.updateDefinition.errors %}
+                {% for error in form.updateDefinition.errors %}
                     <p class="errorMessage">{{ error }}</p>
                 {% endfor %}
             {% endif %}
-            <em>Enter concept definitions in the text box or upload a file of definitions.</em>
-            {{ form.conceptText }}
-            <em>{{ form.textAreaType.label }}</em>
-            <ul class="textAreaFormat">
-                {% for option in form.textAreaType %}
-                    <li>
-                        {% if form.errors %}
-                            {{ option }} {{ option.label }}
-                        {% else %}
-                            {{ option(checked=option.data == form.textAreaType.default) }} {{ option.label }}
-                        {% endif %}
-                    </li>
-                {% endfor %}
-            </ul>
-            <p>
-                {{ form.conceptFile }}
-            </p>
+            <em>{{ form.conceptName.label }}</em>
+            {{ form.conceptName }}
+            <em>{{ form.positiveTerms.label }}</em>
+            {{ form.positiveTerms }}
+            <em>{{ form.negativeTerms.label }}</em>
+            {{ form.negativeTerms }}
+            <em>{{ form.codes.label }}</em>
+            {{ form.codes }}
         </fieldset>
     </section>
     <section>
         {% set formatErrors = form.codeFormats.errors %}
         <fieldset class={{ "errorsPresent" if formatErrors else "" }}>
-            <legend>Code Format Options</legend>
+            <legend>Code Format</legend>
             {% if formatErrors %}
                 {% for error in formatErrors %}
                     <p class="errorMessage">{{ error }}</p>
                 {% endfor %}
             {% endif %}
-            <em>Select desired code format.</em>
-            <ul>
+            <em>Select a code format to use.</em>
+            <ul id="codeFormat">
                 {% for option in form.codeFormats %}
                     <li>
                         {% if formatErrors %}
@@ -57,7 +50,8 @@
             </ul>
         </fieldset>
     </section>
-    <section id="buttons">
-        {{ form.conceptSubmit }}
+    <section id="defUpdate">
+        {{ form.updateDefinition }}
+        {{ form.saveDefinition }}
     </section>
 </form>

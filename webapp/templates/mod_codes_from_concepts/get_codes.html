@@ -9,18 +9,16 @@
               href="{{ url_for('static', filename='CSS/mod_codes_from_concepts/get_codes.css') }}">
     </head>
     <body>
-        <div>
-            <header>
-                Header
-            </header>
-            <section class="conceptDefs">
+        <div class="conceptSearch">
+            <section id="conceptDefs">
                 {% include "mod_codes_from_concepts/concept_form.html" %}
             </section>
-            <section class="codeViewer">
+            <section id="codeViewer">
                 Viewer
             </section>
-            <footer class="navControl">
-                Footer
+            <footer id="navControl">
+                Concept Picker
+                {{ form.multiConceptFile }}
             </footer>
         </div>
         <script type=text/javascript src="{{ url_for('static', filename='JS/jquery.js') }}"></script>

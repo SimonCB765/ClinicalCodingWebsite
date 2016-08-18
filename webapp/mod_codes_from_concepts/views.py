@@ -12,24 +12,32 @@ def get_codes():
     """Render and process the page for extracting codes from concept definitions."""
 
     # Get the form for displaying or validating.
-    uploadForm = forms.ConceptUploadForm()
+    conceptForm = forms.ConceptDefinitionForm()
 
     if request.method == 'POST':
         # A POST request was made, so validate the form.
-        if uploadForm.validate():
-            response = jsonify({
-                "response": render_template("mod_codes_from_concepts/concept_form.html", form=uploadForm),
+        if conceptForm.validate():
+            # Form input is valid.
+            response = {
+                "action": "update",
+                "response": render_template("mod_codes_from_concepts/concept_form.html", form=conceptForm),
                 "success": True
-            })
+            }
+
+            # Determine whether the concept needs saving.
+            if conceptForm.saveDefinition.data:
+                # Save the concept.
+                response["action"] = "save"
         else:
-            response = jsonify({
-                "response": render_template("mod_codes_from_concepts/concept_form.html", form=uploadForm),
+            # Form input is not valid.
+            response = {
+                "response": render_template("mod_codes_from_concepts/concept_form.html", form=conceptForm),
                 "success": False
-            })
-        return response
+            }
+        return jsonify(response)
     else:
         # A GET request was made, so just render the page.
-        return render_template("mod_codes_from_concepts/get_codes.html", form=uploadForm)
+        return render_template("mod_codes_from_concepts/get_codes.html", form=conceptForm)
 
 
 def task_status(taskID):

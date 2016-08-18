@@ -8,8 +8,8 @@ from flask import current_app
 from flask_wtf import Form
 
 # 3rd party imports.
-from wtforms import FileField, RadioField, SelectMultipleField, SubmitField, TextAreaField, widgets
-from wtforms.validators import DataRequired, ValidationError
+from wtforms import FileField, RadioField, SelectMultipleField, StringField, SubmitField, TextAreaField, widgets
+from wtforms.validators import ValidationError
 
 # User imports.
 from .ConceptCollection import ConceptCollection
@@ -18,29 +18,11 @@ from .ConceptCollection import ConceptCollection
 def concept_definitions_validator(form, field):
     """Validate the concept definitions."""
 
-    isFileUploaded = bool(form.conceptFile.data)
-    isTextEntered = bool(form.conceptText.data)
-    if isFileUploaded and isTextEntered:
-        # Concepts were uploaded as a file and text.
-        raise ValidationError("Only one source of concepts can be provided.")
-    elif not isFileUploaded and not isTextEntered:
-        # No concepts were uploaded.
-        raise ValidationError("No source of concepts was provided.")
-    else:
-        # Concepts were provided, so validate them.
-
-        # Determine the content that was uploaded, and record some information about it.
-        # Wrap the text area's content in StringIO in order to enable file-like operations on it, and to keep it in
-        # line with how the uploaded file content is accessed.
-        if isFileUploaded:
-            # A file was uploaded.
-            filename = form.conceptFile.data.filename
-            fileFormat = (filename.rsplit('.', 1)[1]).lower()
-            uploadContents = io.TextIOWrapper(form.conceptFile.data, newline=None)
-        else:
-            # Text was entered in the text area.
-            fileFormat = form.textAreaType.data
-            uploadContents = io.StringIO(form.conceptText.data, newline=None)
+    if bool(form.multiConceptFile.data) and not form.saveDefinition.data:
+        # A file containing multiple concepts was uploaded and the user didn't click save.
+        filename = form.multiConceptFile.data.filename
+        fileFormat = (filename.rsplit('.', 1)[1]).lower()
+        uploadContents = io.TextIOWrapper(form.multiConceptFile.data, newline=None)
 
         # Ensure that the format of the uploaded file is correct.
         allowedExtensions = current_app.config["ALLOWED_EXTENSIONS"]
@@ -51,20 +33,29 @@ def concept_definitions_validator(form, field):
 
         # Validate the uploaded concept(s). The only real constraint on the the concept file is that at least one
         # concept is defined in the correct format.
-        errors = ConceptCollection.validate_concept_file(uploadContents, fileFormat, isFileUploaded)
+        errors = ConceptCollection.validate_concept_file(uploadContents, fileFormat, True)
 
         if errors:
-            # Found an error in the uploaded file or text area.
-            if not isFileUploaded:
-                form.conceptSubmit.errors.append("Errors found while validating the pasted text.")
-            else:
-                form.conceptSubmit.errors.append("Errors found while validating the uploaded file.")
+            # Found an error in the uploaded file.
+            form.conceptSubmit.errors.append("Errors found while validating the uploaded file.")
             form.conceptSubmit.errors.extend(errors)
 
         uploadContents.seek(0)  # Reset the stream back to the start so that it can be properly validated.
-        if isFileUploaded:
-            # Only need to detach when it was a file uploaded.
-            uploadContents.detach()  # Detach the buffer to prevent TextIOWrapper closing the underlying file.
+        uploadContents.detach()  # Detach the buffer to prevent TextIOWrapper closing the underlying file.
+    else:
+        # No file was uploaded. We are therefore going off of the free text entered in the form. This text has no
+        # format associated with it, so is automatically valid. However, there still must be some content in one
+        # of the fields and a name for the concept.
+        conceptCodes = form.codes.data
+        posTerms = form.positiveTerms.data
+        negTerms = form.negativeTerms.data
+
+        if not (conceptCodes or posTerms or negTerms):
+            # No concept definition information has been supplied.
+            raise ValidationError("No concept defining terms or codes were provided.")
+        elif not form.conceptName.data:
+            # The concept was not given a name.
+            raise ValidationError("No name for the concept was provided.")
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -78,13 +69,15 @@ class MultiCheckboxField(SelectMultipleField):
     option_widget = widgets.CheckboxInput()
 
 
-class ConceptUploadForm(Form):
+class ConceptDefinitionForm(Form):
     """Class representing the form for uploading information about the concepts to find codes for."""
 
-    conceptText = TextAreaField()
-    textAreaType = RadioField("Concept format:", choices=[("txt", "Flat File"), ("json", "JSON")], default="txt")
-    conceptFile = FileField()
+    codes = TextAreaField("Defining Codes")
     codeFormats = RadioField(choices=[("ReadV2", "Read v2"), ("CTV3", "CTV3"), ("SNOMED_CT", "SNOMED-CT")],
-                             default="ReadV2",
-                             validators=[DataRequired(message="At least one code format must be selected.")])
-    conceptSubmit = SubmitField("Upload Concepts", validators=[concept_definitions_validator])
+                             default="ReadV2")
+    conceptName = StringField("Concept Name")
+    multiConceptFile = FileField()
+    negativeTerms = TextAreaField("Negative Terms")
+    positiveTerms = TextAreaField("Positive Terms")
+    saveDefinition = SubmitField("Save Definition")
+    updateDefinition = SubmitField("Update Definition", validators=[concept_definitions_validator])

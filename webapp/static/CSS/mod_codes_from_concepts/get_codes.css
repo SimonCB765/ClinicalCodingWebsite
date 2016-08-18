@@ -1,16 +1,99 @@
-footer.navControl {
-    margin-bottom: 0;
+body {
+    margin: 0;
+    min-width: 800px;
+    white-space: nowrap;
+}
+
+textarea {
+    font-size: 1.1em;
+    height: 7em;
+    margin: 0;
+    margin-bottom: 1em;
+    padding: 0;
+    resize: vertical;
+    white-space: nowrap;
     width: 100%;
 }
 
-section.conceptDefs {
-    display: inline-block;
+div.conceptSearch {
+    height: 100vh;
+}
+
+#conceptDefs {
+    display: table;
+    float: left;
+    height: 90%;
     margin: 0 1.5%;
     width: 40%;
 }
 
-section.codeViewer {
-    display: inline-block;
+#codeViewer {
+    display: table;
+    float: right;
+    height: 90%;
     margin: 0 1.5%;
     width: 50%;
+}
+
+#navControl {
+    bottom: 0;
+    clear: both;
+    margin: 2em 0 1em 0;
+    position: fixed;
+    text-align: center;
+    width: 100%;
+}
+
+/*
+Concept form declarations.
+*/
+#conceptDefs form {
+    display: table-cell;
+    vertical-align:middle;
+}
+
+#conceptDefs em {
+    display: block;
+}
+
+#conceptDefs fieldset {
+    border-style: solid;
+    margin: 0.5em 0;
+    padding-bottom: 0;
+}
+
+#conceptDefs legend {
+    font-weight: bold;
+}
+
+#codeFormat {
+    display: table;
+    list-style: none;
+    margin: 0.5em auto;
+    padding: 0;
+}
+
+#codeFormat li {
+    display: inline-block;
+    margin: 0 0.5em;
+}
+
+#codeFormat li input {
+    margin: 0;
+    margin-top: -3px;
+    vertical-align: middle;
+}
+
+#conceptName {
+    margin: 0;
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+#defUpdate {
+    text-align: center;
+}
+
+#defUpdate input {
+    margin: 0 1em;
 }

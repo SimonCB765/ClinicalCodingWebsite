@@ -24,7 +24,10 @@ $(document).ready(function() {
                 form.html(data["response"])
                 if (data["success"]) {
                     if (data["action"] === "update") {
-                        // The form was successfully validated and an update of the concept's codes needs to be performed.
+                        // The form was successfully validated and an update of the concept's codes needs to be
+                        // performed.
+                        var statusURL = data["pollURL"];
+                        get_extraction_progress(statusURL);
 
                         //Make ajax call and update the form based on the success of that.
                         // Update the form element. Use .html rather than .replaceWith to preserve handlers.

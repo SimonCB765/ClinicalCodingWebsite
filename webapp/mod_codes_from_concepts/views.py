@@ -5,7 +5,7 @@ from flask import jsonify, render_template, request, url_for
 
 # User imports.
 from . import forms
-from . import long_task
+from . import tasks
 
 
 def get_codes():
@@ -33,7 +33,7 @@ def get_codes():
             elif conceptForm.extractCodes.data:
                 # Extract the codes for the concept.
                 response["action"] = "extract"
-                task = long_task.main.apply_async(args=[10, 11])
+                task = tasks.code_extraction.apply_async(args=[10, 11])
                 response["pollURL"] = url_for("codesFromConcepts.extraction_task_status", taskID=task.id)
         else:
             # Form input is not valid.
@@ -48,7 +48,7 @@ def get_codes():
 
 
 def extraction_task_status(taskID):
-    task = long_task.main.AsyncResult(taskID)
+    task = tasks.code_extraction.AsyncResult(taskID)
     if not task.info:
         # Can't find the task. A proper check for this is saving the task id to the database with the input.
         response = {

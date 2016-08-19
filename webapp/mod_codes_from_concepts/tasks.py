@@ -5,7 +5,7 @@ from .. import celeryInstance
 
 
 @celeryInstance.task(bind=True)
-def main(self, x, y):
+def code_extraction(self, x, y):
     """Background task that runs a long function with progress reports."""
     verb = ['Starting up', 'Booting', 'Repairing', 'Loading', 'Checking']
     adjective = ['master', 'radiant', 'silent', 'harmonic', 'fast']

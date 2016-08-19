@@ -2,7 +2,7 @@
     {{ form.hidden_tag() }}  <!-- Needed to ensure that wtf finds the CSRF token as part of the form data. -->
     {% if form.errors %}
         <p class="errorsPresent">
-            Sorry, something went wrong. Please check the form for errors, correct them and submit again.
+            Sorry, something went wrong. Please correct any errors and submit again.
         </p>
     {% elif form.saveDefinition.data %}
         <p class="saveSuccess">

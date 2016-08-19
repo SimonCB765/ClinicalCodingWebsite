@@ -52,7 +52,11 @@ def concept_definitions_validator(form, field):
 
         if not (conceptCodes or posTerms or negTerms):
             # No concept definition information has been supplied.
-            raise ValidationError("No concept defining terms or codes were provided.")
+            if not form.conceptName.data:
+                # The concept was not given a name.
+                raise ValidationError("No name or concept defining terms/codes provided.")
+            else:
+                raise ValidationError("No concept defining terms or codes were provided.")
         elif not form.conceptName.data:
             # The concept was not given a name.
             raise ValidationError("No name for the concept was provided.")

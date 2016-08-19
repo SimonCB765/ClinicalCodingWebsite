@@ -80,6 +80,7 @@ class ConceptDefinitionForm(Form):
     codeFormats = RadioField(choices=[("ReadV2", "Read v2"), ("CTV3", "CTV3"), ("SNOMED_CT", "SNOMED-CT")],
                              default="ReadV2")
     conceptName = StringField("Concept Name")
+    extractCodes = SubmitField("Extract Codes")
     multiConceptFile = FileField()
     negativeTerms = TextAreaField("Negative Terms")
     positiveTerms = TextAreaField("Positive Terms")

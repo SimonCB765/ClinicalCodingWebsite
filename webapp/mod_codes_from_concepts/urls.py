@@ -8,6 +8,6 @@ from . import modCodesFromConcepts, views
 modCodesFromConcepts.add_url_rule('/', 'get_codes', methods=["GET", "POST"],
                                   view_func=views.get_codes)
 
-# Task status polling url.
-modCodesFromConcepts.add_url_rule('/task_status/<taskID>', 'task_status', methods=["GET"],
-                                  view_func=views.task_status)
+# Extraction task status polling url.
+modCodesFromConcepts.add_url_rule('/extraction_task_status/<taskID>', 'extraction_task_status', methods=["GET"],
+                                  view_func=views.extraction_task_status)

@@ -19,20 +19,22 @@ def get_codes():
         if conceptForm.validate():
             # Form input is valid.
             response = {
-                "action": "update",
                 "response": render_template("mod_codes_from_concepts/concept_form.html", form=conceptForm),
                 "success": True
             }
 
-            # Determine whether the concept needs saving.
-            if conceptForm.saveDefinition.data:
+            # Determine which button was pressed.
+            if conceptForm.updateDefinition.data:
+                # The concept definition and tree visual need updating.
+                response["action"] = "update"
+            elif conceptForm.saveDefinition.data:
                 # Save the concept.
                 response["action"] = "save"
-
-            # Determine whether a code list needs extracting.
-            if conceptForm.extractCodes.data:
+            elif conceptForm.extractCodes.data:
                 # Extract the codes for the concept.
                 response["action"] = "extract"
+                task = long_task.main.apply_async(args=[10, 11])
+                response["pollURL"] = url_for("codesFromConcepts.extraction_task_status", taskID=task.id)
         else:
             # Form input is not valid.
             response = {
@@ -45,10 +47,10 @@ def get_codes():
         return render_template("mod_codes_from_concepts/get_codes.html", form=conceptForm)
 
 
-def task_status(taskID):
+def extraction_task_status(taskID):
     task = long_task.main.AsyncResult(taskID)
     if not task.info:
-        # Can't find the task. A proper check for his is saving the task id to the database with the input.
+        # Can't find the task. A proper check for this is saving the task id to the database with the input.
         response = {
             "state": "Can't find task",
             "current": 0,

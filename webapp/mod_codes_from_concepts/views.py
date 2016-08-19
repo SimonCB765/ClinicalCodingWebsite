@@ -1,7 +1,7 @@
 """Handlers for the pages made available by this blueprint."""
 
 # Flask imports.
-from flask import jsonify, redirect, render_template, request, url_for
+from flask import jsonify, render_template, request, url_for
 
 # User imports.
 from . import forms

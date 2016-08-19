@@ -17,10 +17,10 @@ app.config.from_object('config.DevelopmentConfig')
 # Add CSRF protection.
 CsrfProtect(app)
 
-# Setup the Celery instance. Do this before blueprints are registeres in order to ensure that the import of
+# Setup the Celery instance. Do this before blueprints are registered in order to ensure that the import of
 # celeryInstance in the blueprints succeeds.
 celeryInstance = Celery(app.name, backend=app.config["CELERY_RESULT_BACKEND"], broker=app.config["CELERY_BROKER_URL"],
-                        include=["webapp.mod_codes_from_concepts.long_task"])
+                        include=["webapp.mod_codes_from_concepts.tasks"])
 celeryInstance.conf.update(app.config)
 
 # Import modules using their blueprint handler variables.

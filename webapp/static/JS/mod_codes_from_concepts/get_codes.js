@@ -20,29 +20,14 @@ $(document).ready(function() {
             processData: false,  // Tell jQuery not to process the data.
             contentType: false,   // Tell jQuery not to set the contentType.
             success: function(data) {
-                if (data["success"]) {
-                    // The form was successfully validated.
-                    if (data["action"] === "update") {
-                        // Update the form to remove any messages that should no longer be present.
-                        // Use .html rather than .replaceWith to preserve handlers.
-                        form.html(data["response"])
+                // Update the form element. Use .html rather than .replaceWith to preserve handlers.
+                form.html(data["response"])
+                if (data["success"] && data["action"] === "update") {
+                    // The form was successfully validated and an update of the concept's codes needs to be performed.
 
-                        // Submit a job to update the concept definitions.
-
-                        //Make ajax call and update the form based on the success of that.
-                        // Update the form element. Use .html rather than .replaceWith to preserve handlers.
-                        //form.html(data["response"])
-                    }
-                    else {
-                        // The concept was saved, so update the form element to indicate this.
-                        // Use .html rather than .replaceWith to preserve handlers.
-                        form.html(data["response"])
-                    }
-                }
-                else {
-                    // The submitted form data was invalid in some way, so update the form element.
-                    // Use .html rather than .replaceWith to preserve handlers.
-                    form.html(data["response"])
+                    //Make ajax call and update the form based on the success of that.
+                    // Update the form element. Use .html rather than .replaceWith to preserve handlers.
+                    //form.html(data["response"])
                 }
             },
             error: function() {

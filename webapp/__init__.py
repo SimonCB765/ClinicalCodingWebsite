@@ -31,10 +31,12 @@ from webapp.mod_core import modCore
 app.register_blueprint(modCodesFromConcepts)
 app.register_blueprint(modCore)
 
+
 # Handle 404 errors.
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
 
 # Handle 500 errors.
 @app.errorhandler(500)

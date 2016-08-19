@@ -30,8 +30,8 @@ def get_codes():
                 response["action"] = "save"
 
             # Determine whether a code list needs extracting.
-            if conceptForm.saveDefinition.data:
-                # Save the concept.
+            if conceptForm.extractCodes.data:
+                # Extract the codes for the concept.
                 response["action"] = "extract"
         else:
             # Form input is not valid.

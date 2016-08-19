@@ -15,7 +15,7 @@ from wtforms.validators import ValidationError
 from .ConceptCollection import ConceptCollection
 
 
-def concept_definitions_validator(form, field):
+def concept_definitions_validator(form):
     """Validate the concept definitions."""
 
     if bool(form.multiConceptFile.data) and not form.saveDefinition.data:

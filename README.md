@@ -25,7 +25,7 @@ To test the website locally:
     - Navigate to `/env`.
     - Run `bin/pip -r requirements.txt` (or possibly `Scripts/pip.exe` depending on the system).
 5. Navigate back to the ClinicalCodingWebsite top level directory.
-6. Run `/env/bin/python run.py`.
+6. Run `/env/bin/python manage.py run_dev`.
 7. Go to the URL shown in the console.
 
 # <a name="AWS">AWS Setup</a>
